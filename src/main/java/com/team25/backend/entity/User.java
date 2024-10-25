@@ -28,6 +28,9 @@ public class User {
     @Column(name = "role")
     private String role;
 
+    // Manager와의 연관관계 추가
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Manager manager;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Reservation> reservations = new ArrayList<>();
@@ -36,5 +39,9 @@ public class User {
         this.username = username;
         this.role = role;
         this.uuid = uuid;
+    }
+
+    public void updateRole(String role){
+        this.role = role;
     }
 }
