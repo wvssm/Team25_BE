@@ -40,4 +40,8 @@ public class User {
         this.role = role;
         this.uuid = uuid;
     }
+
+    public void updateRole(String role){
+        this.role = role;
+    }
 }
