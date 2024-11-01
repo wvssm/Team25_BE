@@ -1,9 +1,11 @@
 package com.team25.backend.service;
 
 import com.team25.backend.dto.request.ReportRequest;
+import com.team25.backend.dto.request.ReportSearchRequest;
 import com.team25.backend.dto.response.ReportResponse;
 import com.team25.backend.entity.Report;
 import com.team25.backend.entity.Reservation;
+import com.team25.backend.enumdomain.MedicineTime;
 import com.team25.backend.exception.ReservationErrorCode;
 import com.team25.backend.exception.ReservationException;
 import com.team25.backend.repository.ReportRepository;
@@ -45,6 +47,35 @@ public class ReportService {
         }
         return reportResponses;
     }
+
+    // 복용 시간에따라 리포트 조회
+    @Transactional(readOnly = true)
+    public List<ReportResponse> getReportByMedicineTime(Long reservationId, ReportSearchRequest reportSearchRequest) {
+        MedicineTime medicineTime = reportSearchRequest.medicineTime();
+        List<Report> reports = reportRepository.findByReservation_Id(reservationId);
+        if (reports.isEmpty()) {
+            throw new ReservationException(ReservationErrorCode.RESERVATION_WITHOUT_REPORT);
+        }
+        List<Report> byMedicineTimeReportList = new ArrayList<>();
+        for (Report report : reports) {
+            if(report.getMedicineTime().equals(medicineTime)) {
+                byMedicineTimeReportList.add(report);
+            }
+        }
+        if (byMedicineTimeReportList.isEmpty()) {
+            throw new ReservationException(ReservationErrorCode.RESERVATION_WITHOUT_REPORT);
+        }
+        ArrayList<ReportResponse> reportResponses = new ArrayList<>();
+        for (Report report : byMedicineTimeReportList) {
+            reportResponses.add(new ReportResponse(report.getDoctorSummary(), report.getFrequency(),
+                report.getMedicineTime().toString(),
+                report.getTimeOfDay())
+            );
+        }
+        return reportResponses;
+    }
+
+
 
     // 환자 결과 리포트 생성
     @Transactional
