@@ -2,6 +2,7 @@ package com.team25.backend.controller;
 
 import com.team25.backend.annotation.LoginUser;
 import com.team25.backend.dto.request.ReportRequest;
+import com.team25.backend.dto.request.ReportSearchRequest;
 import com.team25.backend.dto.response.ApiResponse;
 import com.team25.backend.dto.response.ReportResponse;
 import com.team25.backend.entity.Report;
@@ -34,6 +35,17 @@ public class ReportController {
         @PathVariable("reservation_id") Long reservationId) {
         return new ResponseEntity<>(
             new ApiResponse<>(true, "리포트 조회를 성공했습니다", reportService.getReport(reservationId)),
+            HttpStatus.OK);
+    }
+
+    @GetMapping("/{reservation_id}")
+    public ResponseEntity<ApiResponse<List<ReportResponse>>> getReportByMedicineTime(
+        @LoginUser User user,
+        @PathVariable("reservation_id") Long reservationId,
+        @RequestBody ReportSearchRequest reportSearchRequest
+        ) {
+        return new ResponseEntity<>(
+            new ApiResponse<>(true, "리포트 조회를 성공했습니다", reportService.getReportByMedicineTime(reservationId,reportSearchRequest)),
             HttpStatus.OK);
     }
 
