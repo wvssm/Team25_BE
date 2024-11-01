@@ -9,15 +9,14 @@ import com.team25.backend.repository.RefreshRepository;
 import com.team25.backend.service.JWTService;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.MalformedJwtException;
-import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+@Slf4j
 @RestController
 public class ReissueController {
     private final JWTUtil jwtUtil;
@@ -30,12 +29,13 @@ public class ReissueController {
         this.jwtService = jwtService;
     }
 
-    @PostMapping("/auth/reissue")
-    public ResponseEntity<ApiResponse<TokenResponse>> reissue(HttpServletRequest request, HttpServletResponse response, @RequestBody ReissueRequest reissueRequest){
+    @PostMapping("/auth/refresh")
+    public ResponseEntity<ApiResponse<TokenResponse>> reissue(@RequestBody ReissueRequest reissueRequest){
         String refresh = reissueRequest.refreshToken();
 
         // 아무것도 안보냈을 때
         if (refresh == null) {
+            log.info("Refresh 토큰이 제공되지 않았습니다.");
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse<> (false, "Refresh 토큰이 제공되지 않았습니다.", null));
         }
 
@@ -43,12 +43,15 @@ public class ReissueController {
         try {
             jwtUtil.isExpired(refresh);
         } catch (ExpiredJwtException e) {
+            log.info("Refresh 토큰이 만료되었습니다.");
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse<> (false, "Refresh 토큰이 만료되었습니다.", null));
         } catch (MalformedJwtException e) {
+            log.info("잘못된 형식의 Refresh 토큰입니다.");
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse<> (false, "잘못된 형식의 Refresh 토큰입니다.", null));
+        } catch (Exception e){
+            log.info(e.getMessage());
+
         }
-
-
 
         String category = jwtUtil.getCategory(refresh);
         // 종류가 리프레시 토큰이 아닌 경우

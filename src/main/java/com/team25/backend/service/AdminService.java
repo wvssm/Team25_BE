@@ -31,6 +31,7 @@ public class AdminService {
                             user.getId(),
                             user.getUsername(),
                             user.getRole(),
+                            manager.getId(),
                             manager.getManagerName(),
                             certificateImages
                     );

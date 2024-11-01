@@ -12,6 +12,7 @@ import com.team25.backend.repository.ManagerRepository;
 import com.team25.backend.repository.CertificateRepository;
 import com.team25.backend.repository.WorkingHourRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,9 +21,11 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class ManagerService {
 
@@ -284,5 +287,28 @@ public class ManagerService {
         validateWorkingHour(request.friStartTime(), request.friEndTime());
         validateWorkingHour(request.satStartTime(), request.satEndTime());
         validateWorkingHour(request.sunStartTime(), request.sunEndTime());
+    }
+
+    @Transactional
+    public void deleteManager(Long managerId) {
+        Optional<Manager> managerOptional = managerRepository.findById(managerId);
+        if (managerOptional.isPresent()) {
+            Manager manager = managerOptional.get();
+
+            if (manager.getUser() != null) {
+                User user = manager.getUser();
+                user.setManager(null);  // User 엔티티에서 Manager 참조 제거
+            }
+
+            if (manager.getWorkingHour() != null) {
+                manager.setWorkingHour(null);  // Manager 엔티티에서 WorkingHour 참조 제거
+            }
+
+            managerRepository.delete(manager);
+            log.info("매니저를 삭제했습니다.");
+            return;
+        }
+
+        log.warn("매니저를 찾을 수 없습니다. ID: " + managerId);
     }
 }

@@ -34,16 +34,18 @@ public class PaymentService {
     private final UserRepository userRepository;
     private final PaymentRepository paymentRepository;
     private final ReservationRepository reservationRepository;
+    private final EncryptionUtil encryptionUtil;
 
     private static final String CLIENT_KEY = System.getenv("NICEPAY_CLIENT_KEY");
     private static final String SECRET_KEY = System.getenv("NICEPAY_SECRET_KEY");
 
-    public PaymentService(RestClient restClient, BillingKeyRepository billingKeyRepository, UserRepository userRepository, PaymentRepository paymentRepository, ReservationRepository reservationRepository) {
+    public PaymentService(RestClient restClient, BillingKeyRepository billingKeyRepository, UserRepository userRepository, PaymentRepository paymentRepository, ReservationRepository reservationRepository, EncryptionUtil encryptionUtil) {
         this.restClient = restClient;
         this.billingKeyRepository = billingKeyRepository;
         this.userRepository = userRepository;
         this.paymentRepository = paymentRepository;
         this.reservationRepository = reservationRepository;
+        this.encryptionUtil = encryptionUtil;
     }
 
     // Authorization 헤더 생성
@@ -100,7 +102,7 @@ public class PaymentService {
         headers.set("Authorization", getAuthorizationHeader());
 
         String ediDate = getEdiDate();
-        String signData = EncryptionUtil.generateSignData(orderId, ediDate, SECRET_KEY);
+        String signData = encryptionUtil.generateSignData(orderId, ediDate, SECRET_KEY);
 
         // 요청 바디 생성
         Map<String, Object> customParams = new HashMap<>();
@@ -127,7 +129,7 @@ public class PaymentService {
         if ("0000".equals(responseDto.resultCode())) {
             BillingKey billingKey = new BillingKey();
             billingKey.setUser(user);
-            billingKey.setBid(responseDto.bid());
+            billingKey.setBid(encryptionUtil.encrypt(responseDto.bid()));
             billingKey.setCardCode(responseDto.cardCode());
             billingKey.setCardName(responseDto.cardName());
             billingKey.setOrderId(orderId);
@@ -147,7 +149,7 @@ public class PaymentService {
         Reservation reservation = reservationRepository.findById(requestDto.reservationId())
                 .orElseThrow(() -> new RuntimeException("Reservation not found"));
 
-        String bid = billingKey.getBid();
+        String bid = encryptionUtil.decrypt(billingKey.getBid());
         String orderId = generateOrderId();
 
         HttpHeaders headers = new HttpHeaders();
@@ -155,7 +157,7 @@ public class PaymentService {
         headers.set("Authorization", getAuthorizationHeader());
 
         String ediDate = getEdiDate();
-        String signData = EncryptionUtil.generateSignData(orderId, bid, ediDate, SECRET_KEY);
+        String signData = encryptionUtil.generateSignData(orderId, bid, ediDate, SECRET_KEY);
 
         // 요청 바디 생성
         Map<String, Object> customParams = new HashMap<>();
@@ -256,14 +258,14 @@ public class PaymentService {
         BillingKey billingKey = billingKeyRepository.findByUserUuid(userUuid)
                 .orElseThrow(() -> new RuntimeException("Billing key not found"));
 
-        String bid = billingKey.getBid();
+        String bid = encryptionUtil.decrypt(billingKey.getBid());
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.set("Authorization", getAuthorizationHeader());
 
         String ediDate = getEdiDate();
-        String signData = EncryptionUtil.generateSignData(requestDto.orderId(), bid, ediDate, SECRET_KEY);
+        String signData = encryptionUtil.generateSignData(requestDto.orderId(), bid, ediDate, SECRET_KEY);
 
         // 요청 바디 생성
         Map<String, Object> customParams = new HashMap<>();
