@@ -52,21 +52,13 @@ public class ReportService {
     @Transactional(readOnly = true)
     public List<ReportResponse> getReportByMedicineTime(Long reservationId, ReportSearchRequest reportSearchRequest) {
         MedicineTime medicineTime = reportSearchRequest.medicineTime();
-        List<Report> reports = reportRepository.findByReservation_Id(reservationId);
-        if (reports.isEmpty()) {
-            throw new ReservationException(ReservationErrorCode.RESERVATION_WITHOUT_REPORT);
-        }
-        List<Report> byMedicineTimeReportList = new ArrayList<>();
-        for (Report report : reports) {
-            if(report.getMedicineTime().equals(medicineTime)) {
-                byMedicineTimeReportList.add(report);
-            }
-        }
-        if (byMedicineTimeReportList.isEmpty()) {
+        List<Report> reportList = reportRepository.findByReservation_IdAndMedicineTime(
+            reservationId, medicineTime);
+        if (reportList.isEmpty()) {
             throw new ReservationException(ReservationErrorCode.RESERVATION_WITHOUT_REPORT);
         }
         ArrayList<ReportResponse> reportResponses = new ArrayList<>();
-        for (Report report : byMedicineTimeReportList) {
+        for (Report report : reportList) {
             reportResponses.add(new ReportResponse(report.getDoctorSummary(), report.getFrequency(),
                 report.getMedicineTime().toString(),
                 report.getTimeOfDay())
