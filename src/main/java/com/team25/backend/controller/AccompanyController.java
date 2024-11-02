@@ -2,6 +2,7 @@ package com.team25.backend.controller;
 
 import com.team25.backend.annotation.LoginUser;
 import com.team25.backend.dto.request.AccompanyRequest;
+import com.team25.backend.dto.response.AccompanyCoordinateResponse;
 import com.team25.backend.dto.response.AccompanyResponse;
 import com.team25.backend.dto.response.ApiResponse;
 import com.team25.backend.entity.User;
@@ -33,6 +34,15 @@ public class AccompanyController {
         return new ResponseEntity<>(
             new ApiResponse<>(true, "실시간 동행현황이 조회되었습니다.", accompanyService.getTrackingAccompanies(
                 reservationId)), HttpStatus.OK);
+    }
+
+    @GetMapping("/{reservation_id}")
+    public ResponseEntity<ApiResponse<List<AccompanyCoordinateResponse>>> getTrackingCoordinate(
+        @LoginUser User user,
+        @PathVariable(name = "reservation_id") Long reservationId) {
+        return new ResponseEntity<>(
+            new ApiResponse<>(true, "실시간 동행 위치 정보가 조회되었습니다.",
+                accompanyService.getTrackingCoordinates(reservationId)), HttpStatus.OK);
     }
 
     @PostMapping("/{reservation_id}")
