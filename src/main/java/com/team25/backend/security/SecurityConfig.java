@@ -1,9 +1,6 @@
-package com.team25.backend.config;
+package com.team25.backend.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.team25.backend.jwt.CustomLogoutFilter;
-import com.team25.backend.jwt.JWTFilter;
-import com.team25.backend.jwt.JWTUtil;
 import com.team25.backend.repository.RefreshRepository;
 import com.team25.backend.repository.UserRepository;
 import org.springframework.context.annotation.Bean;
@@ -28,12 +25,16 @@ public class SecurityConfig {
     private final UserRepository userRepository;
     private final RefreshRepository refreshRepository;
     private final ObjectMapper objectMapper;
+    private final CustomAccessDeniedHandler customAccessDeniedHandler;
+    private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
 
-    public SecurityConfig(JWTUtil jwtUtil, UserRepository userRepository, RefreshRepository refreshRepository, ObjectMapper objectMapper) {
+    public SecurityConfig(JWTUtil jwtUtil, UserRepository userRepository, RefreshRepository refreshRepository, ObjectMapper objectMapper, CustomAccessDeniedHandler customAccessDeniedHandler, CustomAuthenticationEntryPoint customAuthenticationEntryPoint) {
         this.jwtUtil = jwtUtil;
         this.userRepository = userRepository;
         this.refreshRepository = refreshRepository;
         this.objectMapper = objectMapper;
+        this.customAccessDeniedHandler = customAccessDeniedHandler;
+        this.customAuthenticationEntryPoint = customAuthenticationEntryPoint;
     }
 
     @Bean
@@ -67,9 +68,16 @@ public class SecurityConfig {
         //경로별 인가 작업
         http
                 .authorizeHttpRequests((auth) -> auth
-                        .requestMatchers("/login", "/", "/join", "/reissue", "/auth/kakao/login", "/oauth2/callback/kakao").permitAll()
+                        .requestMatchers("/login", "/", "/join", "/reissue", "/auth/*", "/oauth2/callback/kakao","/api/users/me/role").permitAll()
                         .requestMatchers("/my").hasRole("USER")
+                        .requestMatchers("api/manager/name").hasRole("MANAGER")
                         .anyRequest().permitAll());
+
+        // 예외 처리 핸들러 추가
+        http
+                .exceptionHandling(exception -> exception
+                .accessDeniedHandler(customAccessDeniedHandler)
+                .authenticationEntryPoint(customAuthenticationEntryPoint));
 
         // JWT Filter
         http
