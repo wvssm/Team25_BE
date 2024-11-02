@@ -6,6 +6,7 @@ import com.team25.backend.entity.Manager;
 import com.team25.backend.entity.Certificate;
 import com.team25.backend.entity.User;
 import com.team25.backend.entity.WorkingHour;
+import com.team25.backend.exception.CustomException;
 import com.team25.backend.exception.ManagerException;
 import com.team25.backend.exception.ManagerErrorCode;
 import com.team25.backend.repository.ManagerRepository;
@@ -23,6 +24,8 @@ import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
+import static com.team25.backend.exception.ErrorCode.MANAGER_NOT_FOUND;
 
 @Service
 @Slf4j
@@ -277,6 +280,12 @@ public class ManagerService {
         workingHourRepository.save(workingHour);
 
         return ManagerWorkingHourUpdateResponse.fromEntity(workingHour);
+    }
+
+    public ManagerNameResponse findManagerNameByUserId(Long userId){
+        Manager manager = managerRepository.findByUserId(userId)
+                .orElseThrow(() ->new CustomException(MANAGER_NOT_FOUND));
+        return new ManagerNameResponse(manager.getManagerName());
     }
 
     private void validateWorkingHourRequest(ManagerWorkingHourUpdateRequest request) {
