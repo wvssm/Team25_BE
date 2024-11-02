@@ -288,27 +288,4 @@ public class ManagerService {
         validateWorkingHour(request.satStartTime(), request.satEndTime());
         validateWorkingHour(request.sunStartTime(), request.sunEndTime());
     }
-
-    @Transactional
-    public void deleteManager(Long managerId) {
-        Optional<Manager> managerOptional = managerRepository.findById(managerId);
-        if (managerOptional.isPresent()) {
-            Manager manager = managerOptional.get();
-
-            if (manager.getUser() != null) {
-                User user = manager.getUser();
-                user.setManager(null);  // User 엔티티에서 Manager 참조 제거
-            }
-
-            if (manager.getWorkingHour() != null) {
-                manager.setWorkingHour(null);  // Manager 엔티티에서 WorkingHour 참조 제거
-            }
-
-            managerRepository.delete(manager);
-            log.info("매니저를 삭제했습니다.");
-            return;
-        }
-
-        log.warn("매니저를 찾을 수 없습니다. ID: " + managerId);
-    }
 }
