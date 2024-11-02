@@ -3,6 +3,7 @@ package com.team25.backend.controller;
 import com.team25.backend.dto.response.AdminPageResponse;
 import com.team25.backend.service.AdminService;
 import com.team25.backend.service.ManagerService;
+import com.team25.backend.service.UserService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,11 +15,11 @@ import java.util.List;
 @Controller
 public class AdminController {
     private final AdminService adminService;
-    private final ManagerService managerService;
+    private final UserService userService;
 
-    public AdminController(AdminService adminService, ManagerService managerService) {
+    public AdminController(AdminService adminService, UserService userService) {
         this.adminService = adminService;
-        this.managerService = managerService;
+        this.userService = userService;
     }
 
     @GetMapping("/admin")
@@ -34,9 +35,9 @@ public class AdminController {
         return "redirect:/admin";
     }
 
-    @PostMapping("/admin/deleteManager")
-    public String deleteManager(@RequestParam("managerId") Long managerId) {
-        managerService.deleteManager(managerId);
-        return "redirect:/admin";
+    @PostMapping("/admin/manager")
+    public String removeUserByUserId(@RequestParam("userId") Long userId) {
+        userService.removeUser(userId);
+        return "redirect:/admin"; // 관리자 페이지로 리다이렉트
     }
 }
