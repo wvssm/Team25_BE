@@ -10,7 +10,8 @@ public enum ErrorCode {
     KAKAO_EXPIRED_TOKEN(HttpStatus.UNAUTHORIZED, "TOKEN IS EXPIRED OR INVALID"),
     USER_NOT_FOUND(HttpStatus.NOT_FOUND,"회원이 존재하지 않습니다."),
     USER_ALREADY_EXISTS(HttpStatus.CONFLICT,"회원이 이미 존재합니다."),
-    RESPONSE_BODY_NULL(HttpStatus.INTERNAL_SERVER_ERROR,"API 요청 응답이 비어있습니다.");
+    RESPONSE_BODY_NULL(HttpStatus.INTERNAL_SERVER_ERROR,"API 요청 응답이 비어있습니다."),
+    MANAGER_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 매니저입니다.");
 
 
     private final HttpStatus status;
