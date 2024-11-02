@@ -49,9 +49,9 @@
                 </form>
             </td>
             <td>
-                <form th:action="@{/admin/deleteManager}" method="post" class="mt-2">
-                    <input type="hidden" th:name="managerId" th:value="${user.managerId}"/>
-                    <button type="submit" class="btn btn-danger">매니저 삭제</button>
+                <form th:action="@{/admin/manager}" method="post" class="mt-2">
+                    <input type="hidden" th:name="userId" th:value="${user.userId}"/>
+                    <button type="submit" class="btn btn-danger">사용자 삭제</button>
                 </form>
             </td>
         </tr>
