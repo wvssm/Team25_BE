@@ -20,12 +20,12 @@ public class JWTService {
     }
 
     public TokenResponse generateJwtToken(UserResponse userDto){
-        Long accessTokenExpiry = 600000L;  // 10분
-        Long refreshTokenExpiry = 86400000L;  // 24시간
+        Long accessTokenExpiry = 60000L;  // 1분
+        Long refreshTokenExpiry = 120000L;  // 2분 테스트용입니다!!
 
         String access = jwtUtil.createJwt("access", userDto.uuid(), accessTokenExpiry );
         String refresh = jwtUtil.createJwt("refresh", userDto.uuid(), refreshTokenExpiry);
-        addRefresh(userDto.uuid(), refresh, 86400000L);
+        addRefresh(userDto.uuid(), refresh, 120000L);
 
         return new TokenResponse(access, accessTokenExpiry, refresh, refreshTokenExpiry);
     }
