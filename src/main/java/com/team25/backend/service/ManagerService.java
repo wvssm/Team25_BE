@@ -288,6 +288,10 @@ public class ManagerService {
         return new ManagerNameResponse(manager.getManagerName());
     }
 
+    public List<Manager> getManagersWithCertificatesAndWorkingHour() {
+        return managerRepository.findManagersWithCertificatesAndWorkingHour();
+    }
+
     private void validateWorkingHourRequest(ManagerWorkingHourUpdateRequest request) {
         validateWorkingHour(request.monStartTime(), request.monEndTime());
         validateWorkingHour(request.tueStartTime(), request.tueEndTime());
