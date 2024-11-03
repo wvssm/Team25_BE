@@ -44,4 +44,8 @@ public class User {
     public void updateRole(String role){
         this.role = role;
     }
+
+    public void setManager(Manager manager) {
+        this.manager = manager;
+    }
 }

@@ -1,0 +1,7 @@
+spring:
+  application:
+    name: client-app
+  cloud:
+    config:
+      uri: http://ec2-3-39-165-195.ap-northeast-2.compute.amazonaws.com:8888
+      fail-fast: true

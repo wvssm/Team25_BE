@@ -6,6 +6,7 @@ public record AdminPageResponse(
         Long userId,
         String username,
         String role,
+        Long managerId,
         String managerName,
         List<String> certificates
 ) {}
