@@ -5,6 +5,9 @@ import com.team25.backend.dto.response.AccompanyCoordinateResponse;
 import com.team25.backend.dto.response.AccompanyResponse;
 import com.team25.backend.entity.Accompany;
 import com.team25.backend.entity.Reservation;
+import com.team25.backend.enumdomain.AccompanyStatus;
+import com.team25.backend.exception.AccompanyErrorCode;
+import com.team25.backend.exception.AccompanyException;
 import com.team25.backend.exception.ReservationErrorCode;
 import com.team25.backend.exception.ReservationException;
 import com.team25.backend.repository.AccompanyRepository;
@@ -12,6 +15,7 @@ import com.team25.backend.repository.ReservationRepository;
 import jakarta.transaction.Transactional;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -48,6 +52,7 @@ public class AccompanyService {
 
     public AccompanyResponse addTrackingAccompany(Long reservationId,
         AccompanyRequest accompanyRequest) {
+        validateAccompanyRequest(accompanyRequest);
         LocalDateTime accompanyDateTime = getLocalDateTime(accompanyRequest);
         Reservation reservation = reservationRepository.findById(reservationId).orElseThrow(
             () -> new ReservationException(ReservationErrorCode.RESERVATION_NOT_FOUND));
@@ -89,6 +94,24 @@ public class AccompanyService {
     private static void checkListEmpty(List<Accompany> searchedAccompanies) {
         if (searchedAccompanies.isEmpty()) {
             throw new ReservationException(ReservationErrorCode.RESERVATION_WITHOUT_ACCOMPANY);
+        }
+    }
+
+    private static void validateAccompanyRequest(AccompanyRequest accompanyRequest) {
+        if(!Arrays.stream(AccompanyStatus.values()).toList().contains(accompanyRequest.status())) {
+            throw new AccompanyException(AccompanyErrorCode.INVALID_ACCOMPANY_STATUS);
+        }
+        if( accompanyRequest.latitude() == null || accompanyRequest.latitude() < 0 || accompanyRequest.latitude() > 90 ) {
+            throw new AccompanyException(AccompanyErrorCode.INVALID_LATITUDE);
+        }
+        if( accompanyRequest.longitude() == null || accompanyRequest.longitude() < 0 || accompanyRequest.longitude() > 90 ) {
+            throw new AccompanyException(AccompanyErrorCode.INVALID_LONGITUDE);
+        }
+        if(accompanyRequest.statusDate().isEmpty()){
+            throw new AccompanyException(AccompanyErrorCode.REQUIRED_DATE_MISSING);
+        }
+        if(accompanyRequest.statusDescribe().isEmpty()){
+            throw new AccompanyException(AccompanyErrorCode.REQUIRED_DESCRIPTION_MISSING);
         }
     }
 }
