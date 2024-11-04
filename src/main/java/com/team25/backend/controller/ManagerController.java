@@ -67,7 +67,7 @@ public class ManagerController {
         @PathVariable("manager_id") Long managerId,
         @RequestBody ManagerWorkingHourCreateRequest request) {
 
-        ManagerWorkingHourCreateResponse response = managerService.addWorkingHour(managerId, request);
+        ManagerWorkingHourCreateResponse response = managerService.updateWorkingHour(managerId, request);
 
         return ResponseEntity.status(HttpStatus.CREATED)
             .body(ApiResponse.<ManagerWorkingHourCreateResponse>builder()
