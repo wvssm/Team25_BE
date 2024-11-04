@@ -271,9 +271,16 @@ public class ManagerService {
         }
     }
 
-    public ManagerLocationUpdateResponse updateLocation(Long managerId, ManagerLocationUpdateRequest request) {
-        Manager manager = managerRepository.findById(managerId)
-            .orElseThrow(() -> new ManagerException(ManagerErrorCode.MANAGER_NOT_FOUND));
+    public ManagerLocationUpdateResponse updateLocation(User user, ManagerLocationUpdateRequest request) {
+        if (user.getId() == null) {
+            throw new ManagerException(ManagerErrorCode.UNAUTHORIZED);
+        }
+
+        Manager manager = user.getManager();
+
+        if (manager == null) {
+            throw new ManagerException(ManagerErrorCode.MANAGER_NOT_FOUND);
+        }
 
         validateWorkingRegion(request.workingRegion());
 
