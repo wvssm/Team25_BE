@@ -108,12 +108,12 @@ public class ManagerController {
         );
     }
 
-    @PatchMapping("/api/manager/comment/{manager_id}")
+    @PatchMapping("/api/manager/comment")
     public ResponseEntity<ApiResponse<ManagerCommentUpdateResponse>> updateComment(
-        @PathVariable("manager_id") Long managerId,
+        @LoginUser User user,
         @RequestBody ManagerCommentUpdateRequest request) {
 
-        ManagerCommentUpdateResponse response = managerService.updateComment(managerId, request);
+        ManagerCommentUpdateResponse response = managerService.updateComment(user, request);
 
         return ResponseEntity.ok(
             ApiResponse.<ManagerCommentUpdateResponse>builder()
