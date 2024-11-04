@@ -14,11 +14,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/tracking")
 public class AccompanyController {
 
     private final AccompanyService accompanyService;
@@ -27,27 +25,27 @@ public class AccompanyController {
         this.accompanyService = accompanyService;
     }
 
-    @GetMapping("/{reservation_id}")
+    @GetMapping("/api/tracking/{reservation_id}")
     public ResponseEntity<ApiResponse<List<AccompanyResponse>>> getTracking(
-        @LoginUser User user,
+          @SuppressWarnings("unused") @LoginUser User user,
         @PathVariable(name = "reservation_id") Long reservationId) {
         return new ResponseEntity<>(
             new ApiResponse<>(true, "실시간 동행현황이 조회되었습니다.", accompanyService.getTrackingAccompanies(
                 reservationId)), HttpStatus.OK);
     }
 
-    @GetMapping("/{reservation_id}")
+    @GetMapping("/api/tracking/{reservation_id}/location")
     public ResponseEntity<ApiResponse<List<AccompanyCoordinateResponse>>> getTrackingCoordinate(
-        @LoginUser User user,
+         @SuppressWarnings("unused")  @LoginUser User user,
         @PathVariable(name = "reservation_id") Long reservationId) {
         return new ResponseEntity<>(
             new ApiResponse<>(true, "실시간 동행 위치 정보가 조회되었습니다.",
                 accompanyService.getTrackingCoordinates(reservationId)), HttpStatus.OK);
     }
 
-    @PostMapping("/{reservation_id}")
+    @PostMapping("/api/manager/tracking/{reservation_id}")
     public ResponseEntity<ApiResponse<AccompanyResponse>> postTracking(
-        @LoginUser User user,
+         @SuppressWarnings("unused")  @LoginUser User user,
         @PathVariable(name = "reservation_id") Long reservationId,
         @RequestBody AccompanyRequest accompanyRequest) {
         return new ResponseEntity<>(
