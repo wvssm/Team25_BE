@@ -36,7 +36,7 @@ import lombok.ToString.Exclude;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Table(name = "reservation")
+@Table(name = "reservations")
 @ToString
 public class Reservation {
 

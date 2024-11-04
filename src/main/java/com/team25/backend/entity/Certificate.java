@@ -9,6 +9,7 @@ import jakarta.persistence.*;
 @AllArgsConstructor
 @Builder
 @Entity
+@Table(name = "certificates")
 public class Certificate {
 
     @Id

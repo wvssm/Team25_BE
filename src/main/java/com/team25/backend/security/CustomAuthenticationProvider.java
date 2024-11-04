@@ -1,4 +1,4 @@
-package com.team25.backend.config;
+package com.team25.backend.security;
 
 import com.team25.backend.service.CustomUserDetailsService;
 import org.springframework.security.authentication.AuthenticationProvider;

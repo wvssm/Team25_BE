@@ -6,6 +6,7 @@ import com.team25.backend.entity.Manager;
 import com.team25.backend.entity.Certificate;
 import com.team25.backend.entity.User;
 import com.team25.backend.entity.WorkingHour;
+import com.team25.backend.exception.CustomException;
 import com.team25.backend.exception.ManagerException;
 import com.team25.backend.exception.ManagerErrorCode;
 import com.team25.backend.repository.ManagerRepository;
@@ -23,6 +24,8 @@ import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
+import static com.team25.backend.exception.ErrorCode.MANAGER_NOT_FOUND;
 
 @Service
 @Slf4j
@@ -279,6 +282,16 @@ public class ManagerService {
         return ManagerWorkingHourUpdateResponse.fromEntity(workingHour);
     }
 
+    public ManagerNameResponse findManagerNameByUserId(Long userId){
+        Manager manager = managerRepository.findByUserId(userId)
+                .orElseThrow(() ->new CustomException(MANAGER_NOT_FOUND));
+        return new ManagerNameResponse(manager.getManagerName());
+    }
+
+    public List<Manager> getManagersWithCertificatesAndWorkingHour() {
+        return managerRepository.findManagersWithCertificatesAndWorkingHour();
+    }
+
     private void validateWorkingHourRequest(ManagerWorkingHourUpdateRequest request) {
         validateWorkingHour(request.monStartTime(), request.monEndTime());
         validateWorkingHour(request.tueStartTime(), request.tueEndTime());
@@ -287,28 +300,5 @@ public class ManagerService {
         validateWorkingHour(request.friStartTime(), request.friEndTime());
         validateWorkingHour(request.satStartTime(), request.satEndTime());
         validateWorkingHour(request.sunStartTime(), request.sunEndTime());
-    }
-
-    @Transactional
-    public void deleteManager(Long managerId) {
-        Optional<Manager> managerOptional = managerRepository.findById(managerId);
-        if (managerOptional.isPresent()) {
-            Manager manager = managerOptional.get();
-
-            if (manager.getUser() != null) {
-                User user = manager.getUser();
-                user.setManager(null);  // User 엔티티에서 Manager 참조 제거
-            }
-
-            if (manager.getWorkingHour() != null) {
-                manager.setWorkingHour(null);  // Manager 엔티티에서 WorkingHour 참조 제거
-            }
-
-            managerRepository.delete(manager);
-            log.info("매니저를 삭제했습니다.");
-            return;
-        }
-
-        log.warn("매니저를 찾을 수 없습니다. ID: " + managerId);
     }
 }

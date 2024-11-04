@@ -23,11 +23,11 @@ import java.util.Optional;
 * */
 @Controller
 public class KakaoOauthController {
-    @Value("${kakao.client-id}")
+    @Value("${kakao.clientId}")
     private String clientId;
-    @Value("${kakao.redirect-url}")
+    @Value("${kakao.redirectUrl}")
     private String redirectUri;
-    @Value("${kakao.client-secret}")
+    @Value("${kakao.clientSecret}")
     private String clientSecret;
 
     @GetMapping("/oauth2/authorize/kakao")
@@ -60,6 +60,7 @@ public class KakaoOauthController {
         KakaoTokenResponse kakaoTokenResponse = Optional.ofNullable(response.getBody()).orElse(null);
 
         System.out.println("accessToken: " + kakaoTokenResponse.access_token());
+        System.out.println("kakaoSecret: " + clientSecret);
         return ResponseEntity.ok(kakaoTokenResponse);
     }
 }
