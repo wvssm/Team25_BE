@@ -210,9 +210,16 @@ public class ManagerService {
     }
 
 
-    public ManagerProfileImageUpdateResponse updateProfileImage(Long managerId, ManagerProfileImageUpdateRequest request) {
-        Manager manager = managerRepository.findById(managerId)
-            .orElseThrow(() -> new ManagerException(ManagerErrorCode.MANAGER_NOT_FOUND));
+    public ManagerProfileImageUpdateResponse updateProfileImage(User user, ManagerProfileImageUpdateRequest request) {
+        if (user.getId() == null) {
+            throw new ManagerException(ManagerErrorCode.UNAUTHORIZED);
+        }
+
+        Manager manager = user.getManager();
+
+        if (manager == null) {
+            throw new ManagerException(ManagerErrorCode.MANAGER_NOT_FOUND);
+        }
 
         validateProfileImage(request.profileImage());
 
