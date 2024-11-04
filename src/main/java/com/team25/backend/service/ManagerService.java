@@ -142,6 +142,19 @@ public class ManagerService {
         return ManagerProfileResponse.fromEntity(manager);
     }
 
+    public ManagerProfileResponse getManagerProfile(User user) {
+        if (user.getId() == null) {
+            throw new ManagerException(ManagerErrorCode.UNAUTHORIZED);
+        }
+
+        Manager manager = user.getManager();
+        if (manager == null) {
+            throw new ManagerException(ManagerErrorCode.MANAGER_NOT_FOUND);
+        }
+
+        return ManagerProfileResponse.fromEntity(manager);
+    }
+
     public ManagerWorkingHourCreateResponse updateWorkingHour(Long managerId, ManagerWorkingHourCreateRequest request) {
         Manager manager = managerRepository.findById(managerId)
             .orElseThrow(() -> new ManagerException(ManagerErrorCode.MANAGER_NOT_FOUND));
