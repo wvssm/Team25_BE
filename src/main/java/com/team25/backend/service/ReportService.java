@@ -1,16 +1,18 @@
 package com.team25.backend.service;
 
 import com.team25.backend.dto.request.ReportRequest;
-import com.team25.backend.dto.request.ReportSearchRequest;
 import com.team25.backend.dto.response.ReportResponse;
 import com.team25.backend.entity.Report;
 import com.team25.backend.entity.Reservation;
 import com.team25.backend.enumdomain.MedicineTime;
+import com.team25.backend.exception.ReportErrorCode;
+import com.team25.backend.exception.ReportException;
 import com.team25.backend.exception.ReservationErrorCode;
 import com.team25.backend.exception.ReservationException;
 import com.team25.backend.repository.ReportRepository;
 import com.team25.backend.repository.ReservationRepository;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -48,32 +50,13 @@ public class ReportService {
         return reportResponses;
     }
 
-    // 복용 시간에따라 리포트 조회
-    @Transactional(readOnly = true)
-    public List<ReportResponse> getReportByMedicineTime(Long reservationId, ReportSearchRequest reportSearchRequest) {
-        MedicineTime medicineTime = reportSearchRequest.medicineTime();
-        List<Report> reportList = reportRepository.findByReservation_IdAndMedicineTime(
-            reservationId, medicineTime);
-        if (reportList.isEmpty()) {
-            throw new ReservationException(ReservationErrorCode.RESERVATION_WITHOUT_REPORT);
-        }
-        ArrayList<ReportResponse> reportResponses = new ArrayList<>();
-        for (Report report : reportList) {
-            reportResponses.add(new ReportResponse(report.getDoctorSummary(), report.getFrequency(),
-                report.getMedicineTime().toString(),
-                report.getTimeOfDay())
-            );
-        }
-        return reportResponses;
-    }
-
-
 
     // 환자 결과 리포트 생성
     @Transactional
     public ReportResponse createReport(Long reservationId, ReportRequest reportRequest) {
+        validateReportRequest(reportRequest);
         Reservation reservation = reservationRepository.findById(reservationId)
-            .orElseThrow(() -> new ReservationException(ReservationErrorCode.USER_NOT_FOUND));
+            .orElseThrow(() -> new ReservationException(ReservationErrorCode.RESERVATION_NOT_FOUND));
         Report report = Report.builder()
             .reservation(reservation)  // 연관관계 설정
             .doctorSummary(reportRequest.doctorSummary())
@@ -82,10 +65,22 @@ public class ReportService {
             .timeOfDay(reportRequest.timeOfDays())
             .build();
 
-        report = reportRepository.save(report);  // Report 엔티티 저장
-        reservation.addReport(report);  // 양방향 관계 설정
+        report = reportRepository.save(report);
+        reservation.addReport(report);
 
         return new ReportResponse(report.getDoctorSummary(), report.getFrequency(),
             report.getMedicineTime().toString(), report.getTimeOfDay());
+    }
+
+    private static void validateReportRequest(ReportRequest reportRequest) {
+        if(reportRequest.doctorSummary() == null || reportRequest.doctorSummary().isEmpty()) {
+            throw new ReportException(ReportErrorCode.REQUIRED_DOCTOR_SUMMARY_MISSING);
+        }
+        if(!Arrays.stream(MedicineTime.values()).toList().contains(reportRequest.medicineTime())) {
+            throw new ReportException(ReportErrorCode.INVALID_MEDICINE_TIME);
+        }
+        if(reportRequest.timeOfDays() == null || reportRequest.timeOfDays().isEmpty()) {
+            throw new ReportException(ReportErrorCode.REQUIRED_TIME_OF_DAYS_MISSING);
+        }
     }
 }

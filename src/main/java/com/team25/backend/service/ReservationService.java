@@ -5,7 +5,6 @@ import static com.team25.backend.exception.ReservationErrorCode.MANAGER_REQUIRED
 import static com.team25.backend.exception.ReservationErrorCode.RESERVATION_ALREADY_CANCELED;
 import static com.team25.backend.exception.ReservationErrorCode.RESERVATION_NOT_BELONG_TO_USER;
 import static com.team25.backend.exception.ReservationErrorCode.RESERVATION_NOT_FOUND;
-import static com.team25.backend.exception.ReservationErrorCode.USER_HAS_NO_RESERVATIONS;
 import static com.team25.backend.exception.ReservationErrorCode.USER_NOT_FOUND;
 
 import com.team25.backend.dto.request.CancelRequest;
@@ -49,21 +48,12 @@ public class ReservationService {
     // 예약 전체 조회
     public List<ReservationResponse> getAllReservations(User user) {
         List<Reservation> reservations = reservationRepository.findByUser_Uuid(user.getUuid());
-        if(reservations.isEmpty()) {
-           throw  new ReservationException(USER_NOT_FOUND);
+        if (reservations.isEmpty()) {
+            throw new ReservationException(USER_NOT_FOUND);
         }
         List<ReservationResponse> responseList = new ArrayList<>();
         for (Reservation reservation : reservations) {
-            responseList.add(
-                new ReservationResponse(
-                    reservation.getDepartureLocation(),
-                    reservation.getArrivalLocation(),
-                    reservation.getReservationDateTime(),
-                    reservation.getServiceType(),
-                    reservation.getTransportation(),
-                    reservation.getPrice()
-                )
-            );
+            responseList.add(getReservationResponse(reservation));
         }
         return responseList;
     }
@@ -73,67 +63,42 @@ public class ReservationService {
         Reservation reservation = reservationRepository.findById(reservationId)
             .orElseThrow(() -> new ReservationException(RESERVATION_NOT_FOUND));
         List<Reservation> reservations = reservationRepository.findByUser_Uuid(user.getUuid());
-        if(reservations.isEmpty()) {
+        if (reservations.isEmpty()) {
             throw new ReservationException(USER_NOT_FOUND);
         }
         if (!reservations.contains(reservation)) {
             throw new ReservationException(RESERVATION_NOT_BELONG_TO_USER);
         }
-        return new ReservationResponse(
-            reservation.getDepartureLocation(),
-            reservation.getArrivalLocation(),
-            reservation.getReservationDateTime(),
-            reservation.getServiceType(),
-            reservation.getTransportation(),
-            reservation.getPrice()
-        );
+
+        return getReservationResponse(reservation);
     }
 
     // 예약 작성
     public ReservationResponse createReservation(ReservationRequest reservationRequest, User user) {
         try {
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-            LocalDateTime reservationDateTime =
-                LocalDateTime.parse(reservationRequest.reservationDateTime(), formatter);
+            LocalDateTime reservationDateTime = getLocalDateTime(reservationRequest);
             if (reservationRequest.managerId() == null) {
                 throw new ReservationException(MANAGER_REQUIRED);
             }
             Manager manager = managerRepository.findById(reservationRequest.managerId())
                 .orElseThrow(() -> new ReservationException(MANAGER_NOT_FOUND));
             Patient patient = patientService.addPatient(reservationRequest.patient());
-            Reservation reservation = Reservation.builder()
-                .departureLocation(reservationRequest.departureLocation())
-                .arrivalLocation(reservationRequest.arrivalLocation())
-                .reservationDateTime(reservationDateTime)
-                .serviceType(reservationRequest.serviceType())
-                .transportation(reservationRequest.transportation())
-                .price(reservationRequest.price())
-                .createdTime(LocalDateTime.now())
-                .reservationStatus(ReservationStatus.CONFIRMED)
-                .patient(patient)
-                .manager(manager)
-                .user(user)
-                .build();
-
+            Reservation reservation = getReservation(reservationRequest, user,
+                reservationDateTime, patient, manager);
             reservationRepository.save(reservation);
-            return new ReservationResponse(
-                reservation.getDepartureLocation(),
-                reservation.getArrivalLocation(),
-                reservation.getReservationDateTime(),
-                reservation.getServiceType(),
-                reservation.getTransportation(),
-                reservation.getPrice());
+            return getReservationResponse(reservation);
         } catch (IllegalArgumentException e) {
             throw new IllegalArgumentException(e.getMessage());
         }
     }
 
     // 예약 취소
+
     @Transactional
     public ReservationResponse cancelReservation(User user, CancelRequest cancelRequest,
         Long reservationId) {
         List<Reservation> reservations = reservationRepository.findByUser_Uuid(user.getUuid());
-        if(reservations.isEmpty()) {
+        if (reservations.isEmpty()) {
             throw new ReservationException(USER_NOT_FOUND);
         }
         Reservation canceledReservation = reservations.stream()
@@ -143,16 +108,10 @@ public class ReservationService {
             throw new ReservationException(RESERVATION_ALREADY_CANCELED);
         }
         CancelReason cancelReason = cancelRequest.cancelReason();
-
         addCancelReasonAndDetail(canceledReservation, cancelReason,
             cancelRequest.cancelDetail()); // 예약에 취소 사유와 상세 정보 추가
         reservationRepository.save(canceledReservation);
-        return new ReservationResponse(canceledReservation.getDepartureLocation(),
-            canceledReservation.getArrivalLocation(),
-            canceledReservation.getReservationDateTime(),
-            canceledReservation.getServiceType(),
-            canceledReservation.getTransportation(),
-            canceledReservation.getPrice());
+        return getReservationResponse(canceledReservation);
     }
 
     private static void addCancelReasonAndDetail(Reservation canceledReservation,
@@ -166,5 +125,43 @@ public class ReservationService {
         if (cancelRequest.cancelDetail().isBlank()) {
             throw new IllegalArgumentException("변심 이유를 반드시 선택해야 합니다.");
         }
+    }
+
+    private static ReservationResponse getReservationResponse(Reservation reservation) {
+        return new ReservationResponse(
+            reservation.getId(),
+            reservation.getManager().getId(),
+            reservation.getDepartureLocation(),
+            reservation.getArrivalLocation(),
+            reservation.getReservationDateTime(),
+            reservation.getServiceType(),
+            reservation.getTransportation(),
+            reservation.getPrice(),
+            reservation.getReservationStatus()
+        );
+    }
+
+    private static Reservation getReservation(ReservationRequest reservationRequest, User user,
+        LocalDateTime reservationDateTime, Patient patient, Manager manager) {
+        return Reservation.builder()
+            .departureLocation(reservationRequest.departureLocation())
+            .arrivalLocation(reservationRequest.arrivalLocation())
+            .reservationDateTime(reservationDateTime)
+            .serviceType(reservationRequest.serviceType())
+            .transportation(reservationRequest.transportation())
+            .price(reservationRequest.price())
+            .createdTime(LocalDateTime.now())
+            .reservationStatus(ReservationStatus.CONFIRMED)
+            .patient(patient)
+            .manager(manager)
+            .user(user)
+            .build();
+    }
+
+    private static LocalDateTime getLocalDateTime(ReservationRequest reservationRequest) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        LocalDateTime reservationDateTime =
+            LocalDateTime.parse(reservationRequest.reservationDateTime(), formatter);
+        return reservationDateTime;
     }
 }

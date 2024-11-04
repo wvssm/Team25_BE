@@ -10,5 +10,8 @@ public enum ReservationStatus {
     CONFIRMED,
 
     @JsonProperty("취소")
-    CANCEL;
+    CANCEL,
+
+    @JsonProperty("완료")
+    COMPLETED
 }
