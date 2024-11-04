@@ -155,13 +155,24 @@ public class ManagerService {
         return ManagerProfileResponse.fromEntity(manager);
     }
 
-    public ManagerWorkingHourCreateResponse updateWorkingHour(Long managerId, ManagerWorkingHourCreateRequest request) {
-        Manager manager = managerRepository.findById(managerId)
-            .orElseThrow(() -> new ManagerException(ManagerErrorCode.MANAGER_NOT_FOUND));
+    public ManagerWorkingHourUpdateResponse updateWorkingHour(User user, ManagerWorkingHourUpdateRequest request) {
+        if (user.getId() == null) {
+            throw new ManagerException(ManagerErrorCode.UNAUTHORIZED);
+        }
+
+        Manager manager = user.getManager();
+
+        if (manager == null) {
+            throw new ManagerException(ManagerErrorCode.MANAGER_NOT_FOUND);
+        }
+
+        WorkingHour workingHour = manager.getWorkingHour();
+        if (workingHour == null) {
+            throw new ManagerException(ManagerErrorCode.WORKING_HOUR_NOT_FOUND);
+        }
 
         validateWorkingHourRequest(request);
 
-        WorkingHour workingHour = manager.getWorkingHour();
         workingHour.setMonStartTime(request.monStartTime());
         workingHour.setMonEndTime(request.monEndTime());
         workingHour.setTueStartTime(request.tueStartTime());
@@ -179,10 +190,10 @@ public class ManagerService {
 
         workingHourRepository.save(workingHour);
 
-        return new ManagerWorkingHourCreateResponse();
+        return ManagerWorkingHourUpdateResponse.fromEntity(workingHour);
     }
 
-    private void validateWorkingHourRequest(ManagerWorkingHourCreateRequest request) {
+    private void validateWorkingHourRequest(ManagerWorkingHourUpdateRequest request) {
         validateWorkingHour(request.monStartTime(), request.monEndTime());
         validateWorkingHour(request.tueStartTime(), request.tueEndTime());
         validateWorkingHour(request.wedStartTime(), request.wedEndTime());
