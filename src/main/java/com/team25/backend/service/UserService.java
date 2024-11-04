@@ -11,6 +11,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
+import static com.team25.backend.exception.ErrorCode.USER_NOT_FOUND;
+
 @Service
 public class UserService {
 
@@ -40,8 +42,15 @@ public class UserService {
 
     public UserResponse findUser(UserRequest userRequest){
         User foundUser = userRepository.findByUsername(userRequest.username())
-                .orElseThrow(()->new CustomException(ErrorCode.USER_NOT_FOUND));
+                .orElseThrow(()->new CustomException(USER_NOT_FOUND));
 
         return new UserResponse(foundUser.getUsername(), foundUser.getUuid(), foundUser.getRole());
+    }
+
+    public void removeUser(Long userId) {
+        userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
+
+        userRepository.deleteById(userId);
     }
 }

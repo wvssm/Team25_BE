@@ -4,7 +4,7 @@ import com.team25.backend.dto.request.ReissueRequest;
 import com.team25.backend.dto.response.ApiResponse;
 import com.team25.backend.dto.response.TokenResponse;
 import com.team25.backend.dto.response.UserResponse;
-import com.team25.backend.jwt.JWTUtil;
+import com.team25.backend.security.JWTUtil;
 import com.team25.backend.repository.RefreshRepository;
 import com.team25.backend.service.JWTService;
 import io.jsonwebtoken.ExpiredJwtException;

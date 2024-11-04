@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Managers</title>
+    <!-- Bootstrap CSS 추가 -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+<div class="container mt-5">
+    <h1 class="text-center mb-4">인증된 매니저들 목록</h1>
+
+    <!-- 뒤로가기 버튼 -->
+    <div class="mb-3">
+        <a th:href="@{/admin}" class="btn btn-secondary">뒤로가기</a>
+    </div>
+
+    <table class="table table-bordered table-striped">
+        <thead class="thead-dark">
+        <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Profile Image</th>
+            <th>Career</th>
+            <th>Comment</th>
+            <th>Working Region</th>
+            <th>Gender</th>
+            <th>Working Hours</th>
+            <th>Certificates</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="manager : ${managers}">
+            <td th:text="${manager.id}"></td>
+            <td th:text="${manager.managerName}"></td>
+            <td><img th:src="${manager.profileImage}" alt="Profile Image" class="img-thumbnail" width="50"/></td>
+            <td th:text="${manager.career}"></td>
+            <td th:text="${manager.comment}"></td>
+            <td th:text="${manager.workingRegion}"></td>
+            <td th:text="${manager.gender}"></td>
+            <td>
+                <table class="table table-sm">
+                    <tr><td>Mon:</td><td th:text="${manager.workingHour.monStartTime} + ' - ' + ${manager.workingHour.monEndTime}"></td></tr>
+                    <tr><td>Tue:</td><td th:text="${manager.workingHour.tueStartTime} + ' - ' + ${manager.workingHour.tueEndTime}"></td></tr>
+                    <tr><td>Wed:</td><td th:text="${manager.workingHour.wedStartTime} + ' - ' + ${manager.workingHour.wedEndTime}"></td></tr>
+                    <tr><td>Thu:</td><td th:text="${manager.workingHour.thuStartTime} + ' - ' + ${manager.workingHour.thuEndTime}"></td></tr>
+                    <tr><td>Fri:</td><td th:text="${manager.workingHour.friStartTime} + ' - ' + ${manager.workingHour.friEndTime}"></td></tr>
+                    <tr><td>Sat:</td><td th:text="${manager.workingHour.satStartTime} + ' - ' + ${manager.workingHour.satEndTime}"></td></tr>
+                    <tr><td>Sun:</td><td th:text="${manager.workingHour.sunStartTime} + ' - ' + ${manager.workingHour.sunEndTime}"></td></tr>
+                </table>
+            </td>
+            <td>
+                <ul class="list-unstyled">
+                    <li th:each="certificate : ${manager.certificates}" th:text="${certificate.certificateImage}"></li>
+                </ul>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+
+<!-- Bootstrap JS, Popper.js, and jQuery 추가 -->
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

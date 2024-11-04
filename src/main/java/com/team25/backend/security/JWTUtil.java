@@ -1,4 +1,4 @@
-package com.team25.backend.jwt;
+package com.team25.backend.security;
 
 import io.jsonwebtoken.Jwts;
 import org.springframework.beans.factory.annotation.Value;

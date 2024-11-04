@@ -9,6 +9,7 @@ import jakarta.persistence.*;
 @AllArgsConstructor
 @Builder
 @Entity
+@Table(name = "working_hour")
 public class WorkingHour {
 
     @Id

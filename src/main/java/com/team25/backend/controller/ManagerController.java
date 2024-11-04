@@ -140,4 +140,11 @@ public class ManagerController {
                 .build()
         );
     }
+
+    @GetMapping("/api/manager/name")
+    @ResponseBody
+    public ResponseEntity<ApiResponse<ManagerNameResponse>> getManagerName(@LoginUser User user){
+        ManagerNameResponse managerName = managerService.findManagerNameByUserId(user.getId());
+        return ResponseEntity.ok(new ApiResponse<>(true,"매니저 이름 조회를 성공했습니다.", managerName));
+    }
 }
