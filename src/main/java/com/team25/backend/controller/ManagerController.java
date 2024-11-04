@@ -62,6 +62,21 @@ public class ManagerController {
         );
     }
 
+    @GetMapping("/api/manager/me/profile")
+    public ResponseEntity<ApiResponse<ManagerProfileResponse>> getManagerProfile(
+        @LoginUser User user) {
+
+        ManagerProfileResponse response = managerService.getManagerProfile(user);
+
+        return ResponseEntity.ok(
+            ApiResponse.<ManagerProfileResponse>builder()
+                .status(true)
+                .message("프로필 조회를 성공했습니다.")
+                .data(response)
+                .build()
+        );
+    }
+
     @PostMapping("/api/manager/time/{manager_id}")
     public ResponseEntity<ApiResponse<ManagerWorkingHourCreateResponse>> addWorkingHour(
         @PathVariable("manager_id") Long managerId,
