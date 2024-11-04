@@ -27,7 +27,7 @@ public class AccompanyController {
 
     @GetMapping("/api/tracking/{reservation_id}")
     public ResponseEntity<ApiResponse<List<AccompanyResponse>>> getTracking(
-          @SuppressWarnings("unused") @LoginUser User user,
+        @SuppressWarnings("unused") @LoginUser User user,
         @PathVariable(name = "reservation_id") Long reservationId) {
         return new ResponseEntity<>(
             new ApiResponse<>(true, "실시간 동행현황이 조회되었습니다.", accompanyService.getTrackingAccompanies(
@@ -36,7 +36,7 @@ public class AccompanyController {
 
     @GetMapping("/api/tracking/{reservation_id}/location")
     public ResponseEntity<ApiResponse<List<AccompanyCoordinateResponse>>> getTrackingCoordinate(
-         @SuppressWarnings("unused")  @LoginUser User user,
+        @SuppressWarnings("unused") @LoginUser User user,
         @PathVariable(name = "reservation_id") Long reservationId) {
         return new ResponseEntity<>(
             new ApiResponse<>(true, "실시간 동행 위치 정보가 조회되었습니다.",
@@ -45,7 +45,7 @@ public class AccompanyController {
 
     @PostMapping("/api/manager/tracking/{reservation_id}")
     public ResponseEntity<ApiResponse<AccompanyResponse>> postTracking(
-         @SuppressWarnings("unused")  @LoginUser User user,
+        @SuppressWarnings("unused") @LoginUser User user,
         @PathVariable(name = "reservation_id") Long reservationId,
         @RequestBody AccompanyRequest accompanyRequest) {
         return new ResponseEntity<>(
