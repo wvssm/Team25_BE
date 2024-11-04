@@ -92,12 +92,12 @@ public class ManagerController {
                 .build());
     }
 
-    @PatchMapping("/api/manager/image/{manager_id}")
+    @PatchMapping("/api/manager/image")
     public ResponseEntity<ApiResponse<ManagerProfileImageUpdateResponse>> updateProfileImage(
-        @PathVariable("manager_id") Long managerId,
+        @LoginUser User user,
         @RequestBody ManagerProfileImageUpdateRequest request) {
 
-        ManagerProfileImageUpdateResponse response = managerService.updateProfileImage(managerId, request);
+        ManagerProfileImageUpdateResponse response = managerService.updateProfileImage(user, request);
 
         return ResponseEntity.ok(
             ApiResponse.<ManagerProfileImageUpdateResponse>builder()
