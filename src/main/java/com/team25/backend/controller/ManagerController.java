@@ -77,17 +77,17 @@ public class ManagerController {
         );
     }
 
-    @PostMapping("/api/manager/time/{manager_id}")
-    public ResponseEntity<ApiResponse<ManagerWorkingHourCreateResponse>> addWorkingHour(
-        @PathVariable("manager_id") Long managerId,
-        @RequestBody ManagerWorkingHourCreateRequest request) {
+    @PostMapping("/api/manager/time")
+    public ResponseEntity<ApiResponse<ManagerWorkingHourUpdateResponse>> addWorkingHour(
+        @LoginUser User user,
+        @RequestBody ManagerWorkingHourUpdateRequest request) {
 
-        ManagerWorkingHourCreateResponse response = managerService.updateWorkingHour(managerId, request);
+        ManagerWorkingHourUpdateResponse response = managerService.updateWorkingHour(user, request);
 
         return ResponseEntity.status(HttpStatus.CREATED)
-            .body(ApiResponse.<ManagerWorkingHourCreateResponse>builder()
+            .body(ApiResponse.<ManagerWorkingHourUpdateResponse>builder()
                 .status(true)
-                .message("근무 시간을 성공적으로 등록했습니다.")
+                .message("근무 시간을 성공적으로 변경했습니다.")
                 .data(response)
                 .build());
     }
