@@ -17,6 +17,7 @@ import com.team25.backend.repository.PaymentRepository;
 import com.team25.backend.repository.ReservationRepository;
 import com.team25.backend.repository.UserRepository;
 import com.team25.backend.util.EncryptionUtil;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
@@ -36,8 +37,10 @@ public class PaymentService {
     private final ReservationRepository reservationRepository;
     private final EncryptionUtil encryptionUtil;
 
-    private static final String CLIENT_KEY = System.getenv("NICEPAY_CLIENT_KEY");
-    private static final String SECRET_KEY = System.getenv("NICEPAY_SECRET_KEY");
+    @Value("${nicepay.clientKey}")
+    private String clientKey;
+    @Value("${nicepay.secretKey}")
+    private String secretKey;
 
     public PaymentService(RestClient restClient, BillingKeyRepository billingKeyRepository, UserRepository userRepository, PaymentRepository paymentRepository, ReservationRepository reservationRepository, EncryptionUtil encryptionUtil) {
         this.restClient = restClient;
@@ -50,7 +53,7 @@ public class PaymentService {
 
     // Authorization 헤더 생성
     private String getAuthorizationHeader() {
-        String credentials = CLIENT_KEY + ":" + SECRET_KEY;
+        String credentials = clientKey + ":" + secretKey;
         String encodedCredentials = Base64.getEncoder().encodeToString(credentials.getBytes(StandardCharsets.UTF_8));
         return "Basic " + encodedCredentials;
     }
@@ -102,7 +105,7 @@ public class PaymentService {
         headers.set("Authorization", getAuthorizationHeader());
 
         String ediDate = getEdiDate();
-        String signData = encryptionUtil.generateSignData(orderId, ediDate, SECRET_KEY);
+        String signData = encryptionUtil.generateSignData(orderId, ediDate, secretKey);
 
         // 요청 바디 생성
         Map<String, Object> customParams = new HashMap<>();
@@ -157,7 +160,7 @@ public class PaymentService {
         headers.set("Authorization", getAuthorizationHeader());
 
         String ediDate = getEdiDate();
-        String signData = encryptionUtil.generateSignData(orderId, bid, ediDate, SECRET_KEY);
+        String signData = encryptionUtil.generateSignData(orderId, bid, ediDate, secretKey);
 
         // 요청 바디 생성
         Map<String, Object> customParams = new HashMap<>();
@@ -265,7 +268,7 @@ public class PaymentService {
         headers.set("Authorization", getAuthorizationHeader());
 
         String ediDate = getEdiDate();
-        String signData = encryptionUtil.generateSignData(requestDto.orderId(), bid, ediDate, SECRET_KEY);
+        String signData = encryptionUtil.generateSignData(requestDto.orderId(), bid, ediDate, secretKey);
 
         // 요청 바디 생성
         Map<String, Object> customParams = new HashMap<>();
