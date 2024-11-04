@@ -246,9 +246,16 @@ public class ManagerService {
         }
     }
 
-    public ManagerCommentUpdateResponse updateComment(Long managerId, ManagerCommentUpdateRequest request) {
-        Manager manager = managerRepository.findById(managerId)
-            .orElseThrow(() -> new ManagerException(ManagerErrorCode.MANAGER_NOT_FOUND));
+    public ManagerCommentUpdateResponse updateComment(User user, ManagerCommentUpdateRequest request) {
+        if (user.getId() == null) {
+            throw new ManagerException(ManagerErrorCode.UNAUTHORIZED);
+        }
+
+        Manager manager = user.getManager();
+
+        if (manager == null) {
+            throw new ManagerException(ManagerErrorCode.MANAGER_NOT_FOUND);
+        }
 
         validateComment(request.comment());
 
