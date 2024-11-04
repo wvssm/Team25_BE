@@ -124,12 +124,12 @@ public class ManagerController {
         );
     }
 
-    @PatchMapping("/api/manager/location/{manager_id}")
+    @PatchMapping("/api/manager/location")
     public ResponseEntity<ApiResponse<ManagerLocationUpdateResponse>> updateLocation(
-        @PathVariable("manager_id") Long managerId,
+        @LoginUser User user,
         @RequestBody ManagerLocationUpdateRequest request) {
 
-        ManagerLocationUpdateResponse response = managerService.updateLocation(managerId, request);
+        ManagerLocationUpdateResponse response = managerService.updateLocation(user, request);
 
         return ResponseEntity.ok(
             ApiResponse.<ManagerLocationUpdateResponse>builder()
