@@ -47,7 +47,7 @@ public class ManagerController {
                 .build());
     }
 
-    @GetMapping("/api/manager/{manager_id}")
+    @GetMapping("/api/manager/profile/{manager_id}")
     public ResponseEntity<ApiResponse<ManagerProfileResponse>> getManagerProfile(
         @PathVariable("manager_id") Long managerId) {
 
