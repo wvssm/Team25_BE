@@ -125,22 +125,6 @@ public class ManagerController {
         );
     }
 
-    @PutMapping("/api/manager/time/{manager_id}")
-    public ResponseEntity<ApiResponse<ManagerWorkingHourUpdateResponse>> updateWorkingHour(
-        @PathVariable("manager_id") Long managerId,
-        @RequestBody ManagerWorkingHourUpdateRequest request) {
-
-        ManagerWorkingHourUpdateResponse response = managerService.updateWorkingHour(managerId, request);
-
-        return ResponseEntity.ok(
-            ApiResponse.<ManagerWorkingHourUpdateResponse>builder()
-                .status(true)
-                .message("근무 시간을 성공적으로 변경했습니다.")
-                .data(response)
-                .build()
-        );
-    }
-
     @GetMapping("/api/manager/name")
     @ResponseBody
     public ResponseEntity<ApiResponse<ManagerNameResponse>> getManagerName(@LoginUser User user){
