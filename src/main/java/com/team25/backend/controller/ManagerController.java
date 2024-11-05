@@ -47,7 +47,7 @@ public class ManagerController {
                 .build());
     }
 
-    @GetMapping("/api/manager/{manager_id}")
+    @GetMapping("/api/manager/profile/{manager_id}")
     public ResponseEntity<ApiResponse<ManagerProfileResponse>> getManagerProfile(
         @PathVariable("manager_id") Long managerId) {
 
@@ -62,27 +62,42 @@ public class ManagerController {
         );
     }
 
-    @PostMapping("/api/manager/time/{manager_id}")
-    public ResponseEntity<ApiResponse<ManagerWorkingHourCreateResponse>> addWorkingHour(
-        @PathVariable("manager_id") Long managerId,
-        @RequestBody ManagerWorkingHourCreateRequest request) {
+    @GetMapping("/api/manager/me/profile")
+    public ResponseEntity<ApiResponse<ManagerProfileResponse>> getManagerProfile(
+        @LoginUser User user) {
 
-        ManagerWorkingHourCreateResponse response = managerService.addWorkingHour(managerId, request);
+        ManagerProfileResponse response = managerService.getManagerProfile(user);
+
+        return ResponseEntity.ok(
+            ApiResponse.<ManagerProfileResponse>builder()
+                .status(true)
+                .message("프로필 조회를 성공했습니다.")
+                .data(response)
+                .build()
+        );
+    }
+
+    @PostMapping("/api/manager/time")
+    public ResponseEntity<ApiResponse<ManagerWorkingHourUpdateResponse>> addWorkingHour(
+        @LoginUser User user,
+        @RequestBody ManagerWorkingHourUpdateRequest request) {
+
+        ManagerWorkingHourUpdateResponse response = managerService.updateWorkingHour(user, request);
 
         return ResponseEntity.status(HttpStatus.CREATED)
-            .body(ApiResponse.<ManagerWorkingHourCreateResponse>builder()
+            .body(ApiResponse.<ManagerWorkingHourUpdateResponse>builder()
                 .status(true)
-                .message("근무 시간을 성공적으로 등록했습니다.")
+                .message("근무 시간을 성공적으로 변경했습니다.")
                 .data(response)
                 .build());
     }
 
-    @PatchMapping("/api/manager/image/{manager_id}")
+    @PatchMapping("/api/manager/image")
     public ResponseEntity<ApiResponse<ManagerProfileImageUpdateResponse>> updateProfileImage(
-        @PathVariable("manager_id") Long managerId,
+        @LoginUser User user,
         @RequestBody ManagerProfileImageUpdateRequest request) {
 
-        ManagerProfileImageUpdateResponse response = managerService.updateProfileImage(managerId, request);
+        ManagerProfileImageUpdateResponse response = managerService.updateProfileImage(user, request);
 
         return ResponseEntity.ok(
             ApiResponse.<ManagerProfileImageUpdateResponse>builder()
@@ -93,12 +108,12 @@ public class ManagerController {
         );
     }
 
-    @PatchMapping("/api/manager/comment/{manager_id}")
+    @PatchMapping("/api/manager/comment")
     public ResponseEntity<ApiResponse<ManagerCommentUpdateResponse>> updateComment(
-        @PathVariable("manager_id") Long managerId,
+        @LoginUser User user,
         @RequestBody ManagerCommentUpdateRequest request) {
 
-        ManagerCommentUpdateResponse response = managerService.updateComment(managerId, request);
+        ManagerCommentUpdateResponse response = managerService.updateComment(user, request);
 
         return ResponseEntity.ok(
             ApiResponse.<ManagerCommentUpdateResponse>builder()
@@ -109,33 +124,17 @@ public class ManagerController {
         );
     }
 
-    @PatchMapping("/api/manager/location/{manager_id}")
+    @PatchMapping("/api/manager/location")
     public ResponseEntity<ApiResponse<ManagerLocationUpdateResponse>> updateLocation(
-        @PathVariable("manager_id") Long managerId,
+        @LoginUser User user,
         @RequestBody ManagerLocationUpdateRequest request) {
 
-        ManagerLocationUpdateResponse response = managerService.updateLocation(managerId, request);
+        ManagerLocationUpdateResponse response = managerService.updateLocation(user, request);
 
         return ResponseEntity.ok(
             ApiResponse.<ManagerLocationUpdateResponse>builder()
                 .status(true)
                 .message("근무 지역을 성공적으로 변경했습니다.")
-                .data(response)
-                .build()
-        );
-    }
-
-    @PutMapping("/api/manager/time/{manager_id}")
-    public ResponseEntity<ApiResponse<ManagerWorkingHourUpdateResponse>> updateWorkingHour(
-        @PathVariable("manager_id") Long managerId,
-        @RequestBody ManagerWorkingHourUpdateRequest request) {
-
-        ManagerWorkingHourUpdateResponse response = managerService.updateWorkingHour(managerId, request);
-
-        return ResponseEntity.ok(
-            ApiResponse.<ManagerWorkingHourUpdateResponse>builder()
-                .status(true)
-                .message("근무 시간을 성공적으로 변경했습니다.")
                 .data(response)
                 .build()
         );
