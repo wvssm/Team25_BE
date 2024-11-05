@@ -1,6 +1,7 @@
 package com.team25.backend.service;
 
 import com.team25.backend.dto.request.UserRequest;
+import com.team25.backend.dto.response.AdminPageUserInfoResponse;
 import com.team25.backend.dto.response.UserResponse;
 import com.team25.backend.entity.User;
 import com.team25.backend.exception.CustomException;
@@ -9,7 +10,9 @@ import com.team25.backend.repository.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static com.team25.backend.exception.ErrorCode.USER_NOT_FOUND;
 
@@ -52,5 +55,27 @@ public class UserService {
                 .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
 
         userRepository.deleteById(userId);
+    }
+
+    public List<AdminPageUserInfoResponse> getAllUsersForAdminPage() {
+        return userRepository.findAll().stream().map(user -> {
+            String description;
+
+            if (user.getManager() == null && "ROLE_USER".equals(user.getRole())) {
+                description = "일반 유저";
+            } else if (user.getManager() != null && "ROLE_USER".equals(user.getRole())) {
+                description = "매니저 승인 대기";
+            } else if (user.getManager() != null && "ROLE_MANAGER".equals(user.getRole())) {
+                description = "매니저";
+            } else {
+                description = "기타";
+            }
+
+            return new AdminPageUserInfoResponse(user.getId(), user.getUsername(), user.getRole(), description);
+        }).collect(Collectors.toList());
+    }
+
+    public void deleteUserById(Long id) {
+        userRepository.deleteById(id);
     }
 }
