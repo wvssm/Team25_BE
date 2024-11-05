@@ -13,8 +13,12 @@ import jakarta.persistence.*;
 public class WorkingHour {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long managerId;
+
+    @OneToOne
+    @MapsId
+    @JoinColumn(name = "manager_id")
+    private Manager manager;
 
     private String monStartTime = "00:00";
     private String monEndTime = "00:00";
@@ -30,8 +34,4 @@ public class WorkingHour {
     private String satEndTime = "00:00";
     private String sunStartTime = "00:00";
     private String sunEndTime = "00:00";
-
-    @OneToOne
-    @JoinColumn(name = "manager_id", nullable = false)
-    private Manager manager;
 }
