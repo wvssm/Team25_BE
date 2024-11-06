@@ -88,8 +88,18 @@ public class PaymentService {
     }
 
     // 빌링키 존재 여부 확인
-    public boolean billingKeyExists(String userUuid) {
-        return billingKeyRepository.findByUserUuid(userUuid).isPresent();
+    public Map<String, Object> billingKeyExists(String userUuid) {
+        Optional<BillingKey> billingKeyOptional = billingKeyRepository.findByUserUuid(userUuid);
+        Map<String, Object> response = new HashMap<>();
+        if (billingKeyOptional.isPresent()) {
+            BillingKey billingKey = billingKeyOptional.get();
+            response.put("exists", true);
+            response.put("cardName", billingKey.getCardName());
+        } else {
+            response.put("exists", false);
+            response.put("cardName", "");
+        }
+        return response;
     }
 
     // 빌링키 발급

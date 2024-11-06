@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/payment")
@@ -66,11 +67,16 @@ public class PaymentController {
 
     // 빌링키 존재 유무 확인
     @GetMapping("/billing-key/exists")
-    public ResponseEntity<ApiResponse<Boolean>> billingKeyExists(@LoginUser User user) {
+    public ResponseEntity<ApiResponse<Map<String, Object>>> billingKeyExists(@LoginUser User user) {
         String userUuid = user.getUuid();
-        boolean exists = paymentService.billingKeyExists(userUuid);
+        Map<String, Object> billingKeyInfo = paymentService.billingKeyExists(userUuid);
+
+        String message = (boolean) billingKeyInfo.get("exists") ?
+                "성공적으로 빌링키 정보를 가져왔습니다." :
+                "성공적으로 빌링키 존재 유무를 가져왔습니다.";
+
         return new ResponseEntity<>(
-                new ApiResponse<>(true, "성공적으로 빌링키 존재 유무를 가져왔습니다.", exists), HttpStatus.OK
+                new ApiResponse<>(true, message, billingKeyInfo), HttpStatus.OK
         );
     }
 
