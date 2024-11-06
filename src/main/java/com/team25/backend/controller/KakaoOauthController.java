@@ -59,8 +59,6 @@ public class KakaoOauthController {
         ResponseEntity<KakaoTokenResponse> response = restTemplate.exchange(request, KakaoTokenResponse.class);
         KakaoTokenResponse kakaoTokenResponse = Optional.ofNullable(response.getBody()).orElse(null);
 
-        System.out.println("accessToken: " + kakaoTokenResponse.access_token());
-        System.out.println("kakaoSecret: " + clientSecret);
         return ResponseEntity.ok(kakaoTokenResponse);
     }
 }
