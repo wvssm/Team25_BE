@@ -7,6 +7,7 @@ import com.team25.backend.dto.response.UserStatusResponse;
 import com.team25.backend.entity.User;
 import com.team25.backend.service.UserService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -30,6 +31,13 @@ public class UserController {
     @ResponseBody
     public ResponseEntity<ApiResponse<UserStatusResponse>> myStatusAPI(@LoginUser User user){
         UserStatusResponse userStatusResponse = userService.getUserStatusById(user.getId());
-        return ResponseEntity.ok(new ApiResponse<>(true,"사용자 역할 조회를 성공했습니다.",userStatusResponse));
+        return ResponseEntity.ok(new ApiResponse<>(true,"사용자 상태 조회를 성공했습니다.",userStatusResponse));
+    }
+
+    @DeleteMapping("/api/users/withdraw")
+    @ResponseBody
+    public ResponseEntity<ApiResponse<?>> deleteMyAccount(@LoginUser User user){
+        userService.removeUser(user.getId());
+        return ResponseEntity.ok(new ApiResponse<>(true,"사용자를 삭제했습니다.",null));
     }
 }
