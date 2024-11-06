@@ -104,7 +104,7 @@ public class AccompanyService {
         if( accompanyRequest.latitude() == null || accompanyRequest.latitude() < 0 || accompanyRequest.latitude() > 90 ) {
             throw new AccompanyException(AccompanyErrorCode.INVALID_LATITUDE);
         }
-        if( accompanyRequest.longitude() == null || accompanyRequest.longitude() < 0 || accompanyRequest.longitude() > 90 ) {
+        if( accompanyRequest.longitude() == null || accompanyRequest.longitude() < 0 || accompanyRequest.longitude() > 180 ) {
             throw new AccompanyException(AccompanyErrorCode.INVALID_LONGITUDE);
         }
         if(accompanyRequest.statusDate().isEmpty()){
