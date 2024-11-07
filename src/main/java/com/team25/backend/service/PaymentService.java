@@ -12,6 +12,8 @@ import com.team25.backend.entity.BillingKey;
 import com.team25.backend.entity.Payment;
 import com.team25.backend.entity.Reservation;
 import com.team25.backend.entity.User;
+import com.team25.backend.exception.PaymentErrorCode;
+import com.team25.backend.exception.PaymentException;
 import com.team25.backend.repository.BillingKeyRepository;
 import com.team25.backend.repository.PaymentRepository;
 import com.team25.backend.repository.ReservationRepository;
@@ -106,6 +108,10 @@ public class PaymentService {
     public BillingKeyResponse createBillingKey(String userUuid, BillingKeyRequest requestDto) throws Exception {
         User user = userRepository.findByUuid(userUuid)
                 .orElseThrow(() -> new RuntimeException("User not found"));
+
+        if (billingKeyRepository.findByUserUuid(userUuid).isPresent()) {
+            throw new PaymentException(PaymentErrorCode.BILLING_KEY_EXISTS);
+        }
 
         String encData = requestDto.encData();
         String orderId = generateOrderId();
