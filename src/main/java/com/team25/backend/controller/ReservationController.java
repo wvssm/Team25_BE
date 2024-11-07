@@ -3,9 +3,11 @@ package com.team25.backend.controller;
 import com.team25.backend.annotation.LoginUser;
 import com.team25.backend.dto.request.CancelRequest;
 import com.team25.backend.dto.request.ReservationRequest;
+import com.team25.backend.dto.request.ReservationstatusRequest;
 import com.team25.backend.dto.response.ApiResponse;
 import com.team25.backend.dto.response.ReservationResponse;
 import com.team25.backend.entity.User;
+import com.team25.backend.enumdomain.ReservationStatus;
 import com.team25.backend.service.ReservationService;
 import jakarta.validation.Valid;
 import java.util.List;
@@ -46,6 +48,17 @@ public class ReservationController {
         @Valid @RequestBody CancelRequest cancelRequest) {
         return new ResponseEntity<>(new ApiResponse<>(true, "예약 취수가 접수되었습니다",
             reservationService.cancelReservation(user, cancelRequest,reservationId)), HttpStatus.OK);
+    }
+
+    @PatchMapping("/change/{reservation_id}")
+    public ResponseEntity<ApiResponse<ReservationResponse>> changeReservation(
+        @LoginUser User user,
+        @PathVariable(name = "reservation_id") Long reservationId,
+        @RequestBody ReservationstatusRequest reservationstatusRequest
+    ){
+        return new ResponseEntity<>(new ApiResponse<>(true, "예약 상태가 변경되었습니다",
+            reservationService.changeReservationStatus(user, reservationId, reservationstatusRequest)),
+            HttpStatus.OK);
     }
 
     @GetMapping("/{reservation_id}")

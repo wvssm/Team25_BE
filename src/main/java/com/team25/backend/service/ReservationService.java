@@ -9,6 +9,7 @@ import static com.team25.backend.exception.ReservationErrorCode.USER_NOT_FOUND;
 
 import com.team25.backend.dto.request.CancelRequest;
 import com.team25.backend.dto.request.ReservationRequest;
+import com.team25.backend.dto.request.ReservationstatusRequest;
 import com.team25.backend.dto.response.ReservationResponse;
 import com.team25.backend.entity.Manager;
 import com.team25.backend.entity.Patient;
@@ -16,6 +17,7 @@ import com.team25.backend.entity.Reservation;
 import com.team25.backend.entity.User;
 import com.team25.backend.enumdomain.CancelReason;
 import com.team25.backend.enumdomain.ReservationStatus;
+import com.team25.backend.exception.ReservationErrorCode;
 import com.team25.backend.exception.ReservationException;
 import com.team25.backend.repository.ManagerRepository;
 import com.team25.backend.repository.ReservationRepository;
@@ -23,6 +25,7 @@ import jakarta.transaction.Transactional;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -53,7 +56,9 @@ public class ReservationService {
         }
         List<ReservationResponse> responseList = new ArrayList<>();
         for (Reservation reservation : reservations) {
-            responseList.add(getReservationResponse(reservation));
+            if (!reservation.getReservationStatus().equals(ReservationStatus.CANCEL)) {
+                responseList.add(getReservationResponse(reservation));
+            }
         }
         return responseList;
     }
@@ -93,7 +98,6 @@ public class ReservationService {
     }
 
     // 예약 취소
-
     @Transactional
     public ReservationResponse cancelReservation(User user, CancelRequest cancelRequest,
         Long reservationId) {
@@ -108,10 +112,21 @@ public class ReservationService {
             throw new ReservationException(RESERVATION_ALREADY_CANCELED);
         }
         CancelReason cancelReason = cancelRequest.cancelReason();
-        addCancelReasonAndDetail(canceledReservation, cancelReason,
-            cancelRequest.cancelDetail()); // 예약에 취소 사유와 상세 정보 추가
+        addCancelReasonAndDetail(canceledReservation, cancelReason, cancelRequest.cancelDetail()); // 예약에 취소 사유와 상세 정보 추가
         reservationRepository.save(canceledReservation);
         return getReservationResponse(canceledReservation);
+    }
+
+    // 예약 상태 변경
+    public ReservationResponse changeReservationStatus(User user, Long reservationId, ReservationstatusRequest reservationstatusRequest) {
+        if(!Arrays.stream(ReservationStatus.values()).toList().contains(reservationstatusRequest.reservationStatus())) {
+            throw new ReservationException(ReservationErrorCode.INVALID_RESERVATION_STATUS);
+        }
+        Reservation reservation = reservationRepository.findById(reservationId)
+            .orElseThrow(() -> new ReservationException(RESERVATION_NOT_FOUND));
+        reservation.setReservationStatus(reservationstatusRequest.reservationStatus());
+        reservationRepository.save(reservation);
+        return getReservationResponse(reservation);
     }
 
     private static void addCancelReasonAndDetail(Reservation canceledReservation,
@@ -160,8 +175,6 @@ public class ReservationService {
 
     private static LocalDateTime getLocalDateTime(ReservationRequest reservationRequest) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        LocalDateTime reservationDateTime =
-            LocalDateTime.parse(reservationRequest.reservationDateTime(), formatter);
-        return reservationDateTime;
+        return LocalDateTime.parse(reservationRequest.reservationDateTime(), formatter);
     }
 }
