@@ -18,11 +18,11 @@
                 if (data.userSelectedType == "R") {
                     console.log("주소 선택 완료: " + data.address);
                     // 도로명 주소 선택 시
-                    window.androidInterface.getAddress(data.zonecode, data.roadAddress, data.buildingName);
+                    window.androidInterface.getAddress(data.zonecode, data.roadAddress, data.buildingName,data.sido);
                 } else {
                     console.log("주소 선택 완료: " + data.address);
                     // 지번 주소 선택 시
-                    window.androidInterface.getAddress(data.zonecode, data.jibunAddress, data.buildingName);
+                    window.androidInterface.getAddress(data.zonecode, data.jibunAddress, data.buildingName, data.sido);
                 }
             },
             width: '100%',

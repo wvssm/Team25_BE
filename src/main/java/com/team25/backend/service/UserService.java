@@ -3,6 +3,7 @@ package com.team25.backend.service;
 import com.team25.backend.dto.request.UserRequest;
 import com.team25.backend.dto.response.AdminPageUserInfoResponse;
 import com.team25.backend.dto.response.UserResponse;
+import com.team25.backend.dto.response.UserStatusResponse;
 import com.team25.backend.entity.User;
 import com.team25.backend.exception.CustomException;
 import com.team25.backend.exception.ErrorCode;
@@ -73,6 +74,22 @@ public class UserService {
 
             return new AdminPageUserInfoResponse(user.getId(), user.getUsername(), user.getRole(), description);
         }).collect(Collectors.toList());
+    }
+
+    public UserStatusResponse getUserStatusById(Long id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
+
+        String description = "USER";
+        if (user.getManager() == null && "ROLE_USER".equals(user.getRole())) {
+            description = "USER";
+        } else if (user.getManager() != null && "ROLE_USER".equals(user.getRole())) {
+            description = "MANAGER_PENDING";
+        } else if (user.getManager() != null && "ROLE_MANAGER".equals(user.getRole())) {
+            description = "MANAGER";
+        }
+
+        return new UserStatusResponse(description);
     }
 
     public void deleteUserById(Long id) {

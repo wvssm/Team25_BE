@@ -7,6 +7,7 @@ import com.team25.backend.repository.UserRepository;
 import com.team25.backend.entity.Certificate;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -14,17 +15,24 @@ import java.util.stream.Collectors;
 @Service
 public class AdminService {
     private final UserRepository userRepository;
+    private final S3Service s3Service;
 
-    public AdminService(UserRepository userRepository) {
+    public AdminService(UserRepository userRepository, S3Service s3Service) {
         this.userRepository = userRepository;
+        this.s3Service = s3Service;
     }
 
     public List<AdminPageResponse> getAllUsersWithManagers() {
+        String bucketName = "manager-app-storage";
+        int duration_minute = 10;
+        Duration duration = Duration.ofMinutes(duration_minute);
+
         return userRepository.findUsersWithManager().stream()
                 .map(user -> {
                     Manager manager = user.getManager();
                     List<String> certificateImages = manager.getCertificates().stream()
                             .map(Certificate::getCertificateImage)
+                            .map(objectKey -> s3Service.generatePresignedUrl(bucketName, objectKey,duration).toString())
                             .collect(Collectors.toList());
 
                     return new AdminPageResponse(

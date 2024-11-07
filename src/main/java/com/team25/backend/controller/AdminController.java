@@ -5,8 +5,8 @@ import com.team25.backend.dto.response.AdminPageUserInfoResponse;
 import com.team25.backend.entity.Manager;
 import com.team25.backend.service.AdminService;
 import com.team25.backend.service.ManagerService;
+import com.team25.backend.service.S3Service;
 import com.team25.backend.service.UserService;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -19,12 +19,11 @@ public class AdminController {
     private final UserService userService;
     private final ManagerService managerService;
 
-    public AdminController(AdminService adminService, UserService userService, ManagerService managerService) {
+    public AdminController(AdminService adminService, UserService userService, ManagerService managerService, S3Service s3Service) {
         this.adminService = adminService;
         this.userService = userService;
         this.managerService = managerService;
     }
-
 
     @GetMapping("/admin")
     public String showAdminPage(Model model) {
@@ -64,4 +63,5 @@ public class AdminController {
         userService.deleteUserById(userId);
         return "redirect:/admin/users";
     }
+
 }
