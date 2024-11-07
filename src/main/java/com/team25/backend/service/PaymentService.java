@@ -107,7 +107,7 @@ public class PaymentService {
     // 빌링키 발급
     public BillingKeyResponse createBillingKey(String userUuid, BillingKeyRequest requestDto) throws Exception {
         User user = userRepository.findByUuid(userUuid)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new PaymentException(PaymentErrorCode.USER_NOT_FOUND));
 
         if (billingKeyRepository.findByUserUuid(userUuid).isPresent()) {
             throw new PaymentException(PaymentErrorCode.BILLING_KEY_EXISTS);
@@ -142,7 +142,7 @@ public class PaymentService {
                     .retrieve()
                     .body(BillingKeyResponse.class);
         } catch (Exception e) {
-            throw new RuntimeException("Failed to request billing key", e);
+            throw new PaymentException(PaymentErrorCode.FAILED_TO_REQUEST_BILLING_KEY);
         }
 
         if ("0000".equals(responseDto.resultCode())) {
@@ -162,11 +162,11 @@ public class PaymentService {
     // 결제 요청
     public PaymentResponse requestPayment(String userUuid, PaymentRequest requestDto) throws Exception {
         BillingKey billingKey = billingKeyRepository.findByUserUuid(userUuid)
-                .orElseThrow(() -> new RuntimeException("Billing key not found"));
+                .orElseThrow(() -> new PaymentException(PaymentErrorCode.BILLING_KEY_NOT_FOUND));
         User user = userRepository.findByUuid(userUuid)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new PaymentException(PaymentErrorCode.USER_NOT_FOUND));
         Reservation reservation = reservationRepository.findById(requestDto.reservationId())
-                .orElseThrow(() -> new RuntimeException("Reservation not found"));
+                .orElseThrow(() -> new PaymentException(PaymentErrorCode.RESERVATION_NOT_FOUND));
 
         String bid = encryptionUtil.decrypt(billingKey.getBid());
         String orderId = generateOrderId();
@@ -200,7 +200,7 @@ public class PaymentService {
                     .retrieve()
                     .body(PaymentResponse.class);
         } catch (Exception e) {
-            throw new RuntimeException("Failed to process payment", e);
+            throw new PaymentException(PaymentErrorCode.FAILED_TO_PROCESS_PAYMENT);
         }
 
         if ("0000".equals(responseDto.resultCode())) {
@@ -227,9 +227,9 @@ public class PaymentService {
     // 결제 취소
     public PaymentResponse requestCancel(String userUuid, PaymentCancelRequest requestDto) throws Exception {
         Payment payment = paymentRepository.findByOrderId(requestDto.orderId())
-                .orElseThrow(() -> new RuntimeException("Payment not found"));
+                .orElseThrow(() -> new PaymentException(PaymentErrorCode.PAYMENT_NOT_FOUND));
         if (!Objects.equals(userUuid, payment.getUser().getUuid())) {
-            throw new RuntimeException("Payment user does not belong to this order");
+            throw new PaymentException(PaymentErrorCode.PAYMENT_USER_MISMATCH);
         }
 
         HttpHeaders headers = new HttpHeaders();
@@ -256,7 +256,7 @@ public class PaymentService {
                     .retrieve()
                     .body(PaymentResponse.class);
         } catch (Exception e) {
-            throw new RuntimeException("Failed to process payment", e);
+            throw new PaymentException(PaymentErrorCode.FAILED_TO_PROCESS_PAYMENT);
         }
 
         if ("0000".equals(responseDto.resultCode())) {
@@ -275,7 +275,7 @@ public class PaymentService {
     // 빌링키 삭제
     public ExpireBillingKeyResponse expireBillingKey(String userUuid, ExpireBillingKeyRequest requestDto) throws Exception {
         BillingKey billingKey = billingKeyRepository.findByUserUuid(userUuid)
-                .orElseThrow(() -> new RuntimeException("Billing key not found"));
+                .orElseThrow(() -> new PaymentException(PaymentErrorCode.BILLING_KEY_NOT_FOUND));
 
         String bid = encryptionUtil.decrypt(billingKey.getBid());
 
@@ -304,7 +304,7 @@ public class PaymentService {
                     .retrieve()
                     .body(ExpireBillingKeyResponse.class);
         } catch (Exception e) {
-            throw new RuntimeException("Failed to expire billing key", e);
+            throw new PaymentException(PaymentErrorCode.FAILED_TO_EXPIRE_BILLING_KEY);
         }
 
         // 빌링키 삭제 처리
@@ -316,14 +316,14 @@ public class PaymentService {
     // 단일 결제정보 조회
     public PaymentInfoResponse getPaymentByOrderId(String orderId) {
         Payment payment = paymentRepository.findByOrderId(orderId)
-                .orElseThrow(() -> new RuntimeException("Payment not found"));
+                .orElseThrow(() -> new PaymentException(PaymentErrorCode.PAYMENT_NOT_FOUND));
         return convertToPaymentInfoResponse(payment);
     }
 
     // 해당 유저의 결제정보 목록 조회
     public List<PaymentInfoResponse> getPaymentsByUserUuid(String userUuid) {
         User user = userRepository.findByUuid(userUuid)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new PaymentException(PaymentErrorCode.USER_NOT_FOUND));
         List<Payment> payments = paymentRepository.findByUser(user);
         return payments.stream()
                 .map(this::convertToPaymentInfoResponse)
