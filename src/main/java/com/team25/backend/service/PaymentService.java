@@ -165,8 +165,12 @@ public class PaymentService {
                 .orElseThrow(() -> new PaymentException(PaymentErrorCode.BILLING_KEY_NOT_FOUND));
         User user = userRepository.findByUuid(userUuid)
                 .orElseThrow(() -> new PaymentException(PaymentErrorCode.USER_NOT_FOUND));
-        Reservation reservation = reservationRepository.findById(requestDto.reservationId())
-                .orElseThrow(() -> new PaymentException(PaymentErrorCode.RESERVATION_NOT_FOUND));
+
+        Reservation reservation = null;
+        if (requestDto.reservationId() != null) {
+            reservation = reservationRepository.findById(requestDto.reservationId())
+                    .orElseThrow(() -> new PaymentException(PaymentErrorCode.RESERVATION_NOT_FOUND));
+        }
 
         String bid = encryptionUtil.decrypt(billingKey.getBid());
         String orderId = generateOrderId();
