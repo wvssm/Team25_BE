@@ -38,18 +38,18 @@ INSERT INTO working_hour (manager_id, mon_start_time, mon_end_time, tue_start_ti
 
 
 INSERT INTO certificates (certificate_image, manager_id) VALUES
-                                                             ('cert_image1.jpg', 1),
-                                                             ('cert_image2.jpg', 2),
-                                                             ('cert_image3.jpg', 2),
-                                                             ('cert_image4.jpg', 3),
-                                                             ('cert_image5.jpg', 4),
-                                                             ('cert_image6.jpg', 5),
-                                                             ('cert_image7.jpg', 5),
-                                                             ('cert_image8.jpg', 6),
-                                                             ('cert_image9.jpg', 7),
-                                                             ('cert_image10.jpg', 8),
-                                                             ('cert_image11.jpg', 8),
-                                                             ('cert_image12.jpg', 9),
-                                                             ('cert_image13.jpg', 10),
-                                                             ('cert_image14.jpg', 10);
+                                                             ('images/certificate/12345678', 1),
+                                                             ('images/certificate/12345678', 2),
+                                                             ('images/certificate/12345678', 2),
+                                                             ('images/certificate/12345678', 3),
+                                                             ('images/certificate/12345678', 4),
+                                                             ('images/certificate/12345678', 5),
+                                                             ('images/certificate/12345678', 5),
+                                                             ('images/certificate/12345678', 6),
+                                                             ('images/certificate/12345678', 7),
+                                                             ('images/certificate/12345678', 8),
+                                                             ('images/certificate/12345678', 8),
+                                                             ('images/certificate/12345678', 9),
+                                                             ('images/certificate/12345678', 10),
+                                                             ('images/certificate/12345678', 10);
 

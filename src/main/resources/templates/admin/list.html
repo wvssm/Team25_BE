@@ -37,7 +37,9 @@
             <td th:text="${user.managerName}"></td>
             <td>
                 <ul>
-                    <li th:each="cert : ${user.certificates}" th:text="${cert}"></li>
+                    <li th:each="certUrl : ${user.certificates}">
+                        <img th:src="${certUrl}" alt="Certificate Image" style="width: 100px; height: auto;"/>
+                    </li>
                 </ul>
             </td>
             <td>
