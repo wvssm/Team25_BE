@@ -102,6 +102,7 @@ public class ReservationService {
     @Transactional
     public ReservationResponse cancelReservation(User user, CancelRequest cancelRequest,
         Long reservationId) {
+
         List<Reservation> reservations = reservationRepository.findByUser_Uuid(user.getUuid());
         if (reservations.isEmpty()) {
             throw new ReservationException(USER_NOT_FOUND);
@@ -125,6 +126,9 @@ public class ReservationService {
         }
         Reservation reservation = reservationRepository.findById(reservationId)
             .orElseThrow(() -> new ReservationException(RESERVATION_NOT_FOUND));
+        if(!user.getReservations().contains(reservation)) {
+            throw new ReservationException(RESERVATION_NOT_BELONG_TO_USER);
+        }
         reservation.setReservationStatus(reservationstatusRequest.reservationStatus());
         reservationRepository.save(reservation);
         return getReservationResponse(reservation);
@@ -137,12 +141,6 @@ public class ReservationService {
         canceledReservation.setReservationStatus(ReservationStatus.CANCEL);
     }
 
-    private static void checkDetailIsNull(CancelRequest cancelRequest) {
-        if (cancelRequest.cancelDetail().isBlank()) {
-            throw new IllegalArgumentException("변심 이유를 반드시 선택해야 합니다.");
-        }
-    }
-
     private static ReservationResponse getReservationResponse(Reservation reservation) {
         return new ReservationResponse(
             reservation.getId(),
@@ -153,7 +151,8 @@ public class ReservationService {
             reservation.getServiceType(),
             reservation.getTransportation(),
             reservation.getPrice(),
-            reservation.getReservationStatus()
+            reservation.getReservationStatus(),
+            reservation.getPatient()
         );
     }
 
