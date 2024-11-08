@@ -7,6 +7,7 @@ import static com.team25.backend.global.exception.ReservationErrorCode.RESERVATI
 import static com.team25.backend.global.exception.ReservationErrorCode.RESERVATION_NOT_FOUND;
 import static com.team25.backend.global.exception.ReservationErrorCode.USER_NOT_FOUND;
 
+import com.team25.backend.domain.patient.dto.response.PatientResponse;
 import com.team25.backend.domain.patient.service.PatientService;
 import com.team25.backend.domain.reservation.dto.request.CancelRequest;
 import com.team25.backend.domain.reservation.dto.request.ReservationRequest;
@@ -152,8 +153,17 @@ public class ReservationService {
             reservation.getTransportation(),
             reservation.getPrice(),
             reservation.getReservationStatus(),
-            reservation.getPatient()
+            getPatientResponse(reservation)
         );
+    }
+
+    private static PatientResponse getPatientResponse(Reservation reservation) {
+        return new PatientResponse(reservation.getPatient().getName(),
+            reservation.getPatient().getPhoneNumber(),
+            reservation.getPatient().getGender(),
+            reservation.getPatient().getPatientRelation(),
+            reservation.getPatient().getBirthDate().toString(),
+            reservation.getPatient().getNokPhone());
     }
 
     private static Reservation getReservation(ReservationRequest reservationRequest, User user,
@@ -174,7 +184,7 @@ public class ReservationService {
     }
 
     private static LocalDateTime getLocalDateTime(ReservationRequest reservationRequest) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
         return LocalDateTime.parse(reservationRequest.reservationDateTime(), formatter);
     }
 }
