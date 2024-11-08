@@ -55,8 +55,8 @@ public class AccompanyService {
     public AccompanyCoordinateResponse updateLatestLocation(Long reservationId, AccompanyLocationRequest accompanyLocationRequest) {
         checkReservationNull(reservationId);
         Accompany latestAccompany = accompanyRepository.findByReservation_id(reservationId).getLast();
-        latestAccompany.setLongitude(Double.parseDouble(accompanyLocationRequest.Longitude()));
-        latestAccompany.setLatitude(Double.parseDouble(accompanyLocationRequest.Latitude()));
+        latestAccompany.setLongitude(Double.parseDouble(accompanyLocationRequest.longitude()));
+        latestAccompany.setLatitude(Double.parseDouble(accompanyLocationRequest.latitude()));
         return getAccompanyCoordinateResponse(latestAccompany);
     }
 
