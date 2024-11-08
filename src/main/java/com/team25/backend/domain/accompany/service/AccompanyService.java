@@ -74,7 +74,7 @@ public class AccompanyService {
     }
 
     private static LocalDateTime getLocalDateTime(AccompanyRequest accompanyRequest) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
         return LocalDateTime.parse(accompanyRequest.statusDate(), formatter);
     }
 
