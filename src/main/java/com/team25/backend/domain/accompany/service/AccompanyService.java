@@ -57,6 +57,7 @@ public class AccompanyService {
         Accompany latestAccompany = accompanyRepository.findByReservation_id(reservationId).getLast();
         latestAccompany.setLongitude(Double.parseDouble(accompanyLocationRequest.longitude()));
         latestAccompany.setLatitude(Double.parseDouble(accompanyLocationRequest.latitude()));
+        accompanyRepository.save(latestAccompany);
         return getAccompanyCoordinateResponse(latestAccompany);
     }
 
