@@ -45,7 +45,7 @@ public class AccompanyController {
                 accompanyService.getLatestLocation(reservationId)), HttpStatus.OK);
     }
 
-    @PatchMapping("/api/tracking/{reservation_id}/location")
+    @PatchMapping("/api/manager/tracking/{reservation_id}/location")
     public ResponseEntity<ApiResponse<AccompanyCoordinateResponse>> updateTrackingCoordinate(
         @SuppressWarnings("unused")@LoginUser User user,
         @PathVariable(name = "reservation_id") Long reservationId,
