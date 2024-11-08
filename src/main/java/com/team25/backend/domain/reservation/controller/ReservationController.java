@@ -41,7 +41,7 @@ public class ReservationController {
         ), HttpStatus.CREATED);
     }
 
-    @PatchMapping("/cancel/{reservation_id}") // 이미 취소된 것을 다시 또 취소하는 경우 에러 처리 필요
+    @PatchMapping("/cancel/{reservation_id}")
     public ResponseEntity<ApiResponse<ReservationResponse>> cancelReservation(
         @LoginUser User user,@PathVariable(name = "reservation_id") Long reservationId,
         @Valid @RequestBody CancelRequest cancelRequest) {
