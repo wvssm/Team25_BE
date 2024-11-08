@@ -18,7 +18,12 @@ public enum ReservationErrorCode {
     INVALID_DATETIME_FORMAT(HttpStatus.BAD_REQUEST, "날짜 시간 형식이 올바르지 않습니다."),
     RESERVATION_WITHOUT_REPORT(HttpStatus.NOT_FOUND, "해당 예약에 대한 리포트가 없습니다."),
     RESERVATION_WITHOUT_ACCOMPANY(HttpStatus.NOT_FOUND, "해당 예약에 대한 실시간 동행 현황 정보가 없습니다."),
-    INVALID_RESERVATION_STATUS(HttpStatus.BAD_REQUEST,"유효하지 않은 예약 상태입니다.");
+    INVALID_SERVICE_TYPE(HttpStatus.BAD_REQUEST,"유효하지 않은 서비스 타입입니다."),
+    INVALID_TRANSPORTATION_TYPE(HttpStatus.BAD_REQUEST, "유효하지 않은 이동 수단입니다."),
+    INVALID_RESERVATION_STATUS(HttpStatus.BAD_REQUEST,"유효하지 않은 예약 상태입니다."),
+    INVALID_DEPARTRUE_ADDRESS(HttpStatus.BAD_REQUEST,"유효하지 않는 출발 장소입니다."),
+    INVALID_ARRIVAL_ADDRESS(HttpStatus.BAD_REQUEST,"유효하지 않는 도착 장소입니다.");
+
     private final HttpStatus httpStatus;
     private final String message;
 }
