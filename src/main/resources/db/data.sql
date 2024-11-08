@@ -15,7 +15,8 @@ INSERT INTO users (username, uuid, role) VALUES
                                              ('카카오14', '550e8400-e29b-41d4-a716-446655440013', 'ROLE_MANAGER'),
                                              ('카카오15', '550e8400-e29b-41d4-a716-446655440014', 'ROLE_MANAGER'),
                                              ('카카오16', '550e8400-e29b-41d4-a716-446655440015', 'ROLE_MANAGER'),
-                                             ('카카오17', '550e8400-e29b-41d4-a716-446655440016', 'ROLE_MANAGER');
+                                             ('카카오17', '550e8400-e29b-41d4-a716-446655440016', 'ROLE_MANAGER'),
+                                             ('카카오18', '550e8400-e29b-41d4-a716-446653423436', 'ROLE_MANAGER');
 
 INSERT INTO managers (user_id, manager_name, profile_image, career, comment, working_region, gender, is_registered) VALUES
                                                                                                                         (1, '김철수', 'images/profile/1', '10년 경력', '성실하고 책임감이 강합니다.', '서울 강서구', '남성', TRUE),
@@ -34,7 +35,8 @@ INSERT INTO managers (user_id, manager_name, profile_image, career, comment, wor
                                                                                                                         (14, '이준호', 'images/profile/3', '7년 경력', '전문가의 신뢰성을 제공합니다.', '경남 창원시', '남성', TRUE),
                                                                                                                         (15, '최예린', 'images/profile/4', '5년 경력', '긍정적인 마인드로 돕습니다.', '강원특별자치도 원주시', '여성', TRUE),
                                                                                                                         (16, '조민재', 'images/profile/5', '10년 경력', '신뢰할 수 있는 전문가입니다.', '전북특별자치도 전주시', '남성', TRUE),
-                                                                                                                        (17, '강수빈', 'images/profile/6', '3년 경력', '항상 최선을 다합니다.', '제주특별자치도 제주시', '여성', TRUE);
+                                                                                                                        (17, '강수빈', 'images/profile/6', '3년 경력', '항상 최선을 다합니다.', '제주특별자치도 제주시', '여성', TRUE),
+                                                                                                                        (18, '테스트', 'images/profile/이창욱241108163753', '3년 경력', '안드로이드 괴물신인 카테캠 캐리중', '부산광역시', '남성', TRUE);
 
 
 INSERT INTO working_hour (manager_id, mon_start_time, mon_end_time, tue_start_time, tue_end_time, wed_start_time, wed_end_time, thu_start_time, thu_end_time, fri_start_time, fri_end_time, sat_start_time, sat_end_time, sun_start_time, sun_end_time) VALUES
@@ -54,7 +56,8 @@ INSERT INTO working_hour (manager_id, mon_start_time, mon_end_time, tue_start_ti
                                                                                                                                                                                                                                                             (14, '11:00', '20:00', '11:00', '20:00', '11:00', '20:00', '11:00', '20:00', '11:00', '20:00', '11:00', '15:00', '00:00', '00:00'),
                                                                                                                                                                                                                                                             (15, '09:00', '18:00', '09:00', '18:00', '09:00', '18:00', '09:00', '18:00', '09:00', '18:00', '10:00', '14:00', '00:00', '00:00'),
                                                                                                                                                                                                                                                             (16, '08:30', '17:30', '08:30', '17:30', '08:30', '17:30', '08:30', '17:30', '08:30', '17:30', '09:30', '13:30', '00:00', '00:00'),
-                                                                                                                                                                                                                                                            (17, '07:30', '16:30', '07:30', '16:30', '07:30', '16:30', '07:30', '16:30', '07:30', '16:30', '08:30', '12:30', '00:00', '00:00');
+                                                                                                                                                                                                                                                            (17, '07:30', '16:30', '07:30', '16:30', '07:30', '16:30', '07:30', '16:30', '07:30', '16:30', '08:30', '12:30', '00:00', '00:00'),
+                                                                                                                                                                                                                                                            (18, '07:30', '16:30', '07:30', '16:30', '07:30', '16:30', '07:30', '16:30', '07:30', '16:30', '08:30', '12:30', '00:00', '00:00');
 
 
 
@@ -75,5 +78,6 @@ INSERT INTO certificates (certificate_image, manager_id) VALUES
                                                              ('images/certificate/12345678', 14),
                                                              ('images/certificate/12345678', 15),
                                                              ('images/certificate/12345678', 16),
-                                                             ('images/certificate/12345678', 17);
+                                                             ('images/certificate/12345678', 17),
+                                                             ('images/certificate/이창욱241108163753', 18);
 
