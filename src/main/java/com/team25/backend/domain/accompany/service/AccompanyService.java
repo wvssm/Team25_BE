@@ -1,5 +1,6 @@
 package com.team25.backend.domain.accompany.service;
 
+import com.team25.backend.domain.accompany.dto.request.AccompanyLocationRequest;
 import com.team25.backend.domain.accompany.dto.request.AccompanyRequest;
 import com.team25.backend.domain.accompany.dto.response.AccompanyCoordinateResponse;
 import com.team25.backend.domain.accompany.dto.response.AccompanyResponse;
@@ -42,12 +43,22 @@ public class AccompanyService {
             .peek(response -> log.info("Accompany details: {}", response)).toList();
     }
 
-    public List<AccompanyCoordinateResponse> getTrackingCoordinates(Long reservationId) {
+    public AccompanyCoordinateResponse getLatestLocation(Long reservationId) {
         checkReservationNull(reservationId);
         List<Accompany> searchedAccompanies = accompanyRepository.findByReservation_id(reservationId);
         checkListEmpty(searchedAccompanies);
         return searchedAccompanies.stream().map(AccompanyService::getAccompanyCoordinateResponse)
-            .peek(reseponse -> log.info("Accompany details: {}", reseponse)).toList();
+            .peek(reseponse -> log.info("Accompany details: {}", reseponse)).toList().getLast();
+    }
+
+
+    public AccompanyCoordinateResponse updateLatestLocation(Long reservationId, AccompanyLocationRequest accompanyLocationRequest) {
+        checkReservationNull(reservationId);
+        Accompany latestAccompany = accompanyRepository.findByReservation_id(reservationId).getLast();
+        latestAccompany.setLongitude(Double.parseDouble(accompanyLocationRequest.longitude()));
+        latestAccompany.setLatitude(Double.parseDouble(accompanyLocationRequest.latitude()));
+        accompanyRepository.save(latestAccompany);
+        return getAccompanyCoordinateResponse(latestAccompany);
     }
 
     public AccompanyResponse addTrackingAccompany(Long reservationId,
@@ -64,7 +75,7 @@ public class AccompanyService {
     }
 
     private static LocalDateTime getLocalDateTime(AccompanyRequest accompanyRequest) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
         return LocalDateTime.parse(accompanyRequest.statusDate(), formatter);
     }
 
@@ -114,4 +125,5 @@ public class AccompanyService {
             throw new AccompanyException(AccompanyErrorCode.REQUIRED_DESCRIPTION_MISSING);
         }
     }
+
 }
