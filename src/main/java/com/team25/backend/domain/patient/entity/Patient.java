@@ -1,7 +1,7 @@
 package com.team25.backend.domain.patient.entity;
 
-import com.team25.backend.domain.reservation.entity.Reservation;
 import com.team25.backend.domain.patient.enumdomain.PatientGender;
+import com.team25.backend.domain.reservation.entity.Reservation;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -17,6 +17,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 
 @Getter
 @Setter
@@ -24,6 +25,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@ToString
 @Table(name = "patient")
 public class Patient {
 
@@ -51,6 +53,7 @@ public class Patient {
     @Column(name = "patient_relation", nullable = false)
     private String patientRelation;
 
+    @ToString.Exclude
     @OneToOne(mappedBy = "patient")
     private Reservation reservation;
 
