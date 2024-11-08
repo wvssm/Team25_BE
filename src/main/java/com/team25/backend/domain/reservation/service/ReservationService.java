@@ -127,7 +127,7 @@ public class ReservationService {
         }
         CancelReason cancelReason = cancelRequest.cancelReason();
         addCancelReasonAndDetail(canceledReservation, cancelReason,
-            cancelRequest.cancelDetail()); // 예약에 취소 사유와 상세 정보 추가
+            cancelRequest.cancelDetail());
         reservationRepository.save(canceledReservation);
         return getReservationResponse(canceledReservation);
     }
@@ -237,7 +237,6 @@ public class ReservationService {
            throw new ReservationException(INVALID_DATETIME_FORMAT);
        }
        try {
-           // "yyyy-MM-dd HH:mm:ss" 형식 검증
            if (!dateTime.matches("\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}")) {
                throw new ReservationException(INVALID_DATETIME_FORMAT);
            }
