@@ -1,5 +1,6 @@
 package com.team25.backend.domain.reservation.dto.response;
 
+import com.team25.backend.domain.patient.entity.Patient;
 import com.team25.backend.domain.reservation.enumdomain.ReservationStatus;
 import com.team25.backend.domain.reservation.enumdomain.ServiceType;
 import com.team25.backend.domain.reservation.enumdomain.Transportation;
@@ -16,5 +17,7 @@ public record ReservationResponse(
     ServiceType serviceType,
     Transportation transportation,
     int price,
-    ReservationStatus reservationStatus) {
+    ReservationStatus reservationStatus,
+    Patient patient
+) {
 }
