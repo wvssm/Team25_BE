@@ -7,7 +7,14 @@
 </head>
 <body>
 <div class="container mt-5">
-    <h2>관리자 페이지</h2>
+    <h2>관리자 페이지 - 매니저 역할 변환</h2>
+
+    <!-- 뒤로가기 버튼 -->
+    <div class="mb-3">
+        <a th:href="@{/admin/managers}" class="btn btn-secondary">매니저 페이지로 가기</a>
+        <a th:href="@{/admin/users}" class="btn btn-secondary">전체 사용자 목록으로 가기</a>
+    </div>
+
     <table class="table table-bordered">
         <thead>
         <tr>
@@ -30,7 +37,9 @@
             <td th:text="${user.managerName}"></td>
             <td>
                 <ul>
-                    <li th:each="cert : ${user.certificates}" th:text="${cert}"></li>
+                    <li th:each="certUrl : ${user.certificates}">
+                        <img th:src="${certUrl}" alt="Certificate Image" style="width: 100px; height: auto;"/>
+                    </li>
                 </ul>
             </td>
             <td>
@@ -49,9 +58,9 @@
                 </form>
             </td>
             <td>
-                <form th:action="@{/admin/deleteManager}" method="post" class="mt-2">
-                    <input type="hidden" th:name="managerId" th:value="${user.managerId}"/>
-                    <button type="submit" class="btn btn-danger">매니저 삭제</button>
+                <form th:action="@{/admin/manager}" method="post" class="mt-2">
+                    <input type="hidden" th:name="userId" th:value="${user.userId}"/>
+                    <button type="submit" class="btn btn-danger">사용자 삭제</button>
                 </form>
             </td>
         </tr>
