@@ -20,7 +20,7 @@ public record ReservationRequest(
     @ValidDepartureLocation String departureLocation,
     @ValidArrivalLocation String arrivalLocation,
     @NotNull(message = "예약 일시를 입력해 주십시오.")
-    @Pattern(regexp = "\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}", message = "잘못된 날짜 형식입니다. 'yyyy-MM-dd HH:mm:ss' 형식으로 입력해주세요.")
+    @Pattern(regexp = "\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}", message = "잘못된 날짜 형식입니다. 'yyyy-MM-dd HH:mm' 형식으로 입력해주세요.")
     String reservationDateTime,
     @ValidServiceType ServiceType serviceType,
     @ValidTransportation Transportation transportation,
