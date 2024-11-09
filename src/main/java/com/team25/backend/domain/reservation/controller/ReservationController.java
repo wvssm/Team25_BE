@@ -1,13 +1,13 @@
 package com.team25.backend.domain.reservation.controller;
 
-import com.team25.backend.global.annotation.LoginUser;
 import com.team25.backend.domain.reservation.dto.request.CancelRequest;
 import com.team25.backend.domain.reservation.dto.request.ReservationRequest;
 import com.team25.backend.domain.reservation.dto.request.ReservationstatusRequest;
-import com.team25.backend.global.dto.response.ApiResponse;
 import com.team25.backend.domain.reservation.dto.response.ReservationResponse;
-import com.team25.backend.domain.user.entity.User;
 import com.team25.backend.domain.reservation.service.ReservationService;
+import com.team25.backend.domain.user.entity.User;
+import com.team25.backend.global.annotation.LoginUser;
+import com.team25.backend.global.dto.response.ApiResponse;
 import jakarta.validation.Valid;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
@@ -43,10 +43,11 @@ public class ReservationController {
 
     @PatchMapping("/cancel/{reservation_id}")
     public ResponseEntity<ApiResponse<ReservationResponse>> cancelReservation(
-        @LoginUser User user,@PathVariable(name = "reservation_id") Long reservationId,
+        @LoginUser User user, @PathVariable(name = "reservation_id") Long reservationId,
         @Valid @RequestBody CancelRequest cancelRequest) {
         return new ResponseEntity<>(new ApiResponse<>(true, "예약 취수가 접수되었습니다",
-            reservationService.cancelReservation(user, cancelRequest,reservationId)), HttpStatus.OK);
+            reservationService.cancelReservation(user, cancelRequest, reservationId)),
+            HttpStatus.OK);
     }
 
     @PatchMapping("/change/{reservation_id}")
@@ -54,9 +55,10 @@ public class ReservationController {
         @LoginUser User user,
         @PathVariable(name = "reservation_id") Long reservationId,
         @RequestBody ReservationstatusRequest reservationstatusRequest
-    ){
+    ) {
         return new ResponseEntity<>(new ApiResponse<>(true, "예약 상태가 변경되었습니다",
-            reservationService.changeReservationStatus(user, reservationId, reservationstatusRequest)),
+            reservationService.changeReservationStatus(user, reservationId,
+                reservationstatusRequest)),
             HttpStatus.OK);
     }
 
@@ -79,5 +81,14 @@ public class ReservationController {
             new ApiResponse<>(true, "사용자의 예약 목록을 조회하였습니다.",
                 reservationService.getAllReservations(user)
             ), HttpStatus.OK);
+    }
+
+    @GetMapping("/manager")
+    public ResponseEntity<ApiResponse<List<ReservationResponse>>> getManagerReservations(
+        @LoginUser User user
+    ) {
+        return new ResponseEntity<>(
+            new ApiResponse<>(true, "매니저용 전체 예약 목록을 조회하였습니다.",
+                reservationService.getManagerReservation(user)), HttpStatus.OK);
     }
 }
