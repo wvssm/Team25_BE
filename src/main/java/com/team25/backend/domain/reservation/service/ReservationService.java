@@ -14,6 +14,7 @@ import static com.team25.backend.global.exception.ReservationErrorCode.INVALID_P
 import static com.team25.backend.global.exception.ReservationErrorCode.INVALID_SERVICE_TYPE;
 import static com.team25.backend.global.exception.ReservationErrorCode.INVALID_TRANSPORTATION_TYPE;
 import static com.team25.backend.global.exception.ReservationErrorCode.MANAGER_NOT_FOUND;
+import static com.team25.backend.global.exception.ReservationErrorCode.NOT_MANAGER;
 import static com.team25.backend.global.exception.ReservationErrorCode.PATIENT_REQUIRED;
 import static com.team25.backend.global.exception.ReservationErrorCode.RESERVATION_ALREADY_CANCELED;
 import static com.team25.backend.global.exception.ReservationErrorCode.RESERVATION_NOT_BELONG_TO_USER;
@@ -132,19 +133,8 @@ public class ReservationService {
         return getReservationResponse(canceledReservation);
     }
 
-    private static void validateCancelReason(CancelRequest cancelRequest) {
-        if(cancelRequest.cancelDetail().isEmpty()){
-            throw new ReservationException(ReservationErrorCode.CANCEL_REASON_REQUIRED);
-        }
-        if (cancelRequest.cancelReason() == null) {
-            throw new ReservationException(ReservationErrorCode.CANCEL_REASON_REQUIRED);
-        }
-        if(!Arrays.stream(CancelReason.values()).toList().contains(cancelRequest.cancelReason())){
-            throw new ReservationException(INVALID_CANCEL_REASON);
-        }
-    }
-
     // 예약 상태 변경
+
     public ReservationResponse changeReservationStatus(User user, Long reservationId,
         ReservationstatusRequest reservationstatusRequest) {
         if (!Arrays.stream(ReservationStatus.values()).toList()
@@ -159,6 +149,35 @@ public class ReservationService {
         reservation.setReservationStatus(reservationstatusRequest.reservationStatus());
         reservationRepository.save(reservation);
         return getReservationResponse(reservation);
+    }
+
+    public List<ReservationResponse> getManagerReservation(User user) {
+        if(!user.getRole().equals("ROLE_MANAGER")){
+            throw new ReservationException(NOT_MANAGER);
+        }
+        List<Reservation> allReservation = reservationRepository.findAll();
+        if(allReservation.isEmpty()){
+            throw new ReservationException(RESERVATION_NOT_FOUND);
+        }
+        List<ReservationResponse> responseList = new ArrayList<>();
+        for (Reservation reservation : allReservation) {
+            if(!reservation.getReservationStatus().equals(ReservationStatus.CANCEL)){
+                responseList.add(getReservationResponse(reservation));
+            }
+        }
+        return responseList;
+    }
+
+    private static void validateCancelReason(CancelRequest cancelRequest) {
+        if(cancelRequest.cancelDetail().isEmpty()){
+            throw new ReservationException(ReservationErrorCode.CANCEL_REASON_REQUIRED);
+        }
+        if (cancelRequest.cancelReason() == null) {
+            throw new ReservationException(ReservationErrorCode.CANCEL_REASON_REQUIRED);
+        }
+        if(!Arrays.stream(CancelReason.values()).toList().contains(cancelRequest.cancelReason())){
+            throw new ReservationException(INVALID_CANCEL_REASON);
+        }
     }
 
     private static void addCancelReasonAndDetail(Reservation canceledReservation,
