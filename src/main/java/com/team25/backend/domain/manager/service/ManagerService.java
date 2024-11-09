@@ -48,14 +48,17 @@ public class ManagerService {
 
     public List<ManagerByDateAndRegionResponse> getManagersByDateAndRegion(String date, String region) {
         validateDate(date);
-        validateRegion(region);
+
+        String regionPrefix = getRegionPrefix(region);
+        validateRegion(regionPrefix);
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         LocalDate localDate = LocalDate.parse(date, formatter);
         String dayOfWeek = localDate.getDayOfWeek().toString().toLowerCase();
 
-        List<Manager> managers = managerRepository.findByWorkingRegion(region).stream()
+        List<Manager> managers = managerRepository.findAll().stream()
             .filter(manager -> hasWorkingHoursOnDay(manager.getWorkingHour(), dayOfWeek))
+            .filter(manager -> manager.getWorkingRegion().startsWith(regionPrefix))
             .toList();
 
         return managers.stream()
@@ -92,18 +95,23 @@ public class ManagerService {
         }
     }
 
-    private void validateRegion(String region) {
-        if (!regionExists(region)) {
+    private String getRegionPrefix(String region) {
+        return region.length() >= 2 ? region.substring(0, 2) : region;
+    }
+
+
+    private void validateRegion(String regionPrefix) {
+        if (!regionExists(regionPrefix)) {
             throw new ManagerException(ManagerErrorCode.REGION_NOT_FOUND);
         }
     }
 
     private boolean regionExists(String region) {
-        return List.of("Busan", "Seoul",
-            "부산광역시 중구", "부산광역시 서구", "부산광역시 동구", "부산광역시 영도구",
-            "부산광역시 부산진구", "부산광역시 동래구", "부산광역시 남구", "부산광역시 북구",
-            "부산광역시 해운대구", "부산광역시 사하구", "부산광역시 금정구", "부산광역시 강서구",
-            "부산광역시 연제구", "부산광역시 수영구", "부산광역시 사상구", "부산광역시 기장군").contains(region);
+        return List.of("서울",
+            "부산", "인천", "대구", "대전",
+            "광주", "울산", "세종", "경기",
+            "충남", "충북", "전남", "경북",
+            "경남", "강원", "전북", "제주").contains(region);
     }
 
     @Transactional
