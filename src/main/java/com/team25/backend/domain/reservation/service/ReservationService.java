@@ -155,7 +155,7 @@ public class ReservationService {
         if(!user.getRole().equals("ROLE_MANAGER")){
             throw new ReservationException(NOT_MANAGER);
         }
-        List<Reservation> allReservation = reservationRepository.findAll();
+        List<Reservation> allReservation = reservationRepository.findByManager_Id(user.getManager().getId());
         if(allReservation.isEmpty()){
             throw new ReservationException(RESERVATION_NOT_FOUND);
         }
