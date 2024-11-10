@@ -126,6 +126,7 @@ public class PaymentService {
         // 요청 바디 생성
         Map<String, Object> customParams = new HashMap<>();
         customParams.put("encData", encData);
+        customParams.put("encMode", "A2");
         customParams.put("orderId", orderId);
 
         Map<String, Object> body = getRequestBody(customParams, ediDate, signData);
