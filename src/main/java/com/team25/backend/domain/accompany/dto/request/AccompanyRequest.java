@@ -5,8 +5,8 @@ import java.io.Serializable;
 
 public record AccompanyRequest(
     AccompanyStatus status,
-    Double latitude,
-    Double longitude,
+    // Double latitude,
+    // Double longitude,
     String statusDate,
     String statusDescribe) implements
     Serializable {
