@@ -55,7 +55,8 @@ public class Reservation {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "manager_id", nullable = false)
+    @JoinColumn(name = "manager_id", nullable = true)
+    @OnDelete(action = OnDeleteAction.SET_NULL)
     private Manager manager;
 
     @ManyToOne(fetch = FetchType.LAZY)
