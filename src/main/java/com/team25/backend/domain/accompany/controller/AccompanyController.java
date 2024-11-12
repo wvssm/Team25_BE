@@ -36,27 +36,6 @@ public class AccompanyController {
                 reservationId)), HttpStatus.OK);
     }
 
-    @GetMapping("/api/tracking/{reservation_id}/location")
-    public ResponseEntity<ApiResponse<AccompanyCoordinateResponse>> getTrackingCoordinate(
-        @SuppressWarnings("unused") @LoginUser User user,
-        @PathVariable(name = "reservation_id") Long reservationId) {
-        return new ResponseEntity<>(
-            new ApiResponse<>(true, "실시간 동행 위치 정보가 조회되었습니다.",
-                accompanyService.getLatestLocation(reservationId)), HttpStatus.OK);
-    }
-
-    @PatchMapping("/api/manager/tracking/{reservation_id}/location")
-    public ResponseEntity<ApiResponse<AccompanyCoordinateResponse>> updateTrackingCoordinate(
-        @SuppressWarnings("unused")@LoginUser User user,
-        @PathVariable(name = "reservation_id") Long reservationId,
-        @RequestBody AccompanyLocationRequest accompanyLocationRequest
-    ) {
-        return new ResponseEntity<>(
-            new ApiResponse<>(true, "실시간 위치 정보가 수정되었습니다",
-                accompanyService.updateLatestLocation(reservationId,accompanyLocationRequest)), HttpStatus.OK
-        );
-    }
-
     @PostMapping("/api/manager/tracking/{reservation_id}")
     public ResponseEntity<ApiResponse<AccompanyResponse>> postTracking(
         @SuppressWarnings("unused") @LoginUser User user,

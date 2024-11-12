@@ -144,6 +144,7 @@ public class ManagerService {
             .build();
 
         certificateRepository.save(certificate);
+        user.setManager(manager);
 
         return new ManagerCreateResponse();
     }
