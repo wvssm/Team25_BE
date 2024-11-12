@@ -140,11 +140,11 @@ public class ReservationService {
             .contains(reservationstatusRequest.reservationStatus())) {
             throw new ReservationException(ReservationErrorCode.INVALID_RESERVATION_STATUS);
         }
-        List<Reservation> byUserUuid = reservationRepository.findByUser_Uuid(user.getUuid());
-        if(byUserUuid.isEmpty()){
+        List<Reservation> managerReservationList = reservationRepository.findByManager_Id(user.getManager().getId());
+        if(managerReservationList.isEmpty()){
             throw new ReservationException(RESERVATION_NOT_FOUND);
         }
-        for (Reservation reservation : byUserUuid) {
+        for (Reservation reservation : managerReservationList) {
             if(reservation.getId().equals(reservationId)) {
                 reservation.setReservationStatus(reservationstatusRequest.reservationStatus());
                 reservationRepository.save(reservation);
