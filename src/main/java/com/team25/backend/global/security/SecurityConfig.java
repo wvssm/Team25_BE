@@ -56,7 +56,9 @@ public class SecurityConfig {
 
         //From 로그인 방식 disable
         http
-                .formLogin((auth) -> auth.disable());
+                .formLogin((auth) -> auth.loginPage("/login")
+                        .loginProcessingUrl("/loginProc")
+                        .permitAll());
 
         //http basic 인증 방식 disable
         http
@@ -67,6 +69,8 @@ public class SecurityConfig {
         http
                 .authorizeHttpRequests((auth) -> auth
                         .requestMatchers( "/",
+                                "/login",
+                                "/loginProc",
                                 "/auth/**",
                                 "/oauth2/callback/kakao",
                                 "/address").permitAll()
@@ -76,7 +80,9 @@ public class SecurityConfig {
                                 "/api/reports/**",
                                 "/api/manager/name").hasAnyRole("USER", "MANAGER")
 
-                        .requestMatchers("/api/manager/profile/**").hasRole("USER")
+                        .requestMatchers("/api/manager/profile/**",
+                                "/api/managers",
+                                "/api/manager").hasRole("USER")
 
                         .requestMatchers("/api/reservations/manager",
                                 "/api/reservations/change/**",
