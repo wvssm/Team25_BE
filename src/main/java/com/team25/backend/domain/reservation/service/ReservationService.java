@@ -134,28 +134,34 @@ public class ReservationService {
     }
 
     // 예약 상태 변경
-
     public ReservationResponse changeReservationStatus(User user, Long reservationId,
         ReservationstatusRequest reservationstatusRequest) {
         if (!Arrays.stream(ReservationStatus.values()).toList()
             .contains(reservationstatusRequest.reservationStatus())) {
             throw new ReservationException(ReservationErrorCode.INVALID_RESERVATION_STATUS);
         }
-        Reservation reservation = reservationRepository.findById(reservationId)
-            .orElseThrow(() -> new ReservationException(RESERVATION_NOT_FOUND));
-        if (!user.getReservations().contains(reservation)) {
-            throw new ReservationException(RESERVATION_NOT_BELONG_TO_USER);
+        List<Reservation> managerReservationList = reservationRepository.findByManager_Id(user.getManager().getId());
+        if(managerReservationList.isEmpty()){
+            throw new ReservationException(RESERVATION_NOT_FOUND);
         }
-        reservation.setReservationStatus(reservationstatusRequest.reservationStatus());
-        reservationRepository.save(reservation);
-        return getReservationResponse(reservation);
+        for (Reservation reservation : managerReservationList) {
+            if(reservation.getId().equals(reservationId)) {
+                reservation.setReservationStatus(reservationstatusRequest.reservationStatus());
+                reservationRepository.save(reservation);
+                return getReservationResponse(reservation);
+            }
+        }
+        throw new ReservationException(RESERVATION_NOT_BELONG_TO_USER);
     }
 
-    public List<ReservationResponse> getManagerReservation(User user) {
+    public List<ReservationResponse> getManagerReservation(User user) { // ManagerUser
         if(!user.getRole().equals("ROLE_MANAGER")){
             throw new ReservationException(NOT_MANAGER);
         }
-        List<Reservation> allReservation = reservationRepository.findAll();
+        if (user.getManager() == null) {
+            throw new ReservationException(MANAGER_NOT_FOUND);
+        }
+        List<Reservation> allReservation = reservationRepository.findByManager_Id(user.getManager().getId());
         if(allReservation.isEmpty()){
             throw new ReservationException(RESERVATION_NOT_FOUND);
         }
@@ -225,6 +231,7 @@ public class ReservationService {
             .patient(patient)
             .manager(manager)
             .user(user)
+            .reports(new ArrayList<>())
             .build();
     }
 

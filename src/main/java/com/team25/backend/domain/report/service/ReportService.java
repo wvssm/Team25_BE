@@ -58,7 +58,7 @@ public class ReportService {
         Reservation reservation = reservationRepository.findById(reservationId)
             .orElseThrow(() -> new ReservationException(ReservationErrorCode.RESERVATION_NOT_FOUND));
         Report report = Report.builder()
-            .reservation(reservation)  // 연관관계 설정
+            .reservation(reservation)
             .doctorSummary(reportRequest.doctorSummary())
             .frequency(reportRequest.frequency())
             .medicineTime(reportRequest.medicineTime())

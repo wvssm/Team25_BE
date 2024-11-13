@@ -9,7 +9,7 @@ import org.springframework.http.HttpStatus;
 public enum ReservationErrorCode {
     USER_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 회원입니다."),
     NOT_MANAGER(HttpStatus.BAD_REQUEST,"매니저 회원이 아닙니다."),
-    RESERVATION_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 예약 번호입니다."),
+    RESERVATION_NOT_FOUND(HttpStatus.NOT_FOUND, "예약이 존재하지 않습니다."),
     USER_HAS_NO_RESERVATIONS(HttpStatus.NOT_FOUND, "해당 회원은 예약 사항이 없습니다."),
     RESERVATION_NOT_BELONG_TO_USER(HttpStatus.BAD_REQUEST, "해당 회원의 예약 번호가 아닙니다."),
     MANAGER_REQUIRED(HttpStatus.BAD_REQUEST, "매니저 선택은 필수 값입니다."),
