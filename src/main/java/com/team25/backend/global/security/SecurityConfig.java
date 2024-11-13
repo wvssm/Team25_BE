@@ -75,15 +75,12 @@ public class SecurityConfig {
 
                         .requestMatchers("/api/users/**",
                                 "/api/tracking/**",
-                                "/api/reports/**",
-                                "/api/manager/name").hasAnyRole("USER", "MANAGER")
+                                "/api/reports/**").hasAnyRole("USER", "MANAGER")
 
                         .requestMatchers("/api/manager/profile/**").hasRole("USER")
 
                         .requestMatchers("/api/reservations/manager",
                                 "/api/reservations/change/**",
-                                "/api/manager/tracking/**",
-                                "/api/manager/reports/**",
                                 "/api/manager/**").hasRole("MANAGER")
 
                         .requestMatchers("/api/reservations/**",
