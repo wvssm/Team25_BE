@@ -1,7 +1,7 @@
 package com.team25.backend.global.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.team25.backend.domain.login.repository.RefreshRepository;
+import com.team25.backend.domain.login.service.ReissueService;
 import com.team25.backend.domain.user.repository.UserRepository;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -16,22 +16,20 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.logout.LogoutFilter;
 
-import static org.springframework.boot.autoconfigure.security.servlet.PathRequest.toH2Console;
-
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
     private final JWTUtil jwtUtil;
     private final UserRepository userRepository;
-    private final RefreshRepository refreshRepository;
+    private final ReissueService reissueService;
     private final ObjectMapper objectMapper;
     private final CustomAccessDeniedHandler customAccessDeniedHandler;
     private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
 
-    public SecurityConfig(JWTUtil jwtUtil, UserRepository userRepository, RefreshRepository refreshRepository, ObjectMapper objectMapper, CustomAccessDeniedHandler customAccessDeniedHandler, CustomAuthenticationEntryPoint customAuthenticationEntryPoint) {
+    public SecurityConfig(JWTUtil jwtUtil, UserRepository userRepository, ReissueService reissueService, ObjectMapper objectMapper, CustomAccessDeniedHandler customAccessDeniedHandler, CustomAuthenticationEntryPoint customAuthenticationEntryPoint) {
         this.jwtUtil = jwtUtil;
         this.userRepository = userRepository;
-        this.refreshRepository = refreshRepository;
+        this.reissueService = reissueService;
         this.objectMapper = objectMapper;
         this.customAccessDeniedHandler = customAccessDeniedHandler;
         this.customAuthenticationEntryPoint = customAuthenticationEntryPoint;
@@ -103,7 +101,7 @@ public class SecurityConfig {
 
         // Logout Filter
         http
-                .addFilterBefore(new CustomLogoutFilter(jwtUtil, refreshRepository, objectMapper), LogoutFilter.class);
+                .addFilterBefore(new CustomLogoutFilter(jwtUtil, reissueService, objectMapper), LogoutFilter.class);
 
         //세션 설정
         http
