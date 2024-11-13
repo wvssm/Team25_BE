@@ -42,6 +42,9 @@ dependencies {
 	implementation 'io.jsonwebtoken:jjwt-jackson:0.12.3'
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
 
+	// uuid
+	implementation 'com.github.f4b6a3:uuid-creator:4.4.0'
+
 	compileOnly 'org.projectlombok:lombok'
 //	runtimeOnly 'com.h2database:h2'
 	annotationProcessor 'org.projectlombok:lombok'
