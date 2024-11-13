@@ -10,6 +10,7 @@ import java.util.Optional;
 public interface ManagerRepository extends JpaRepository<Manager, Long> {
   List<Manager> findByWorkingRegion(String workingRegion);
   Optional<Manager> findByUserId(Long userId);
+  boolean existsByUserId(Long userId);
   @Query("SELECT m FROM Manager m WHERE m.workingHour IS NOT NULL AND size(m.certificates) > 0")
   List<Manager> findManagersWithCertificatesAndWorkingHour();
 }
