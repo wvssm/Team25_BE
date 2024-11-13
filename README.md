@@ -84,11 +84,12 @@
 ![image](https://github.com/user-attachments/assets/e116606d-f276-4389-ac36-bb7a6b8ebe5a)
 
 ## 코드 유지 관리자
-|      | **노신**                 | **박정훈**                  | **이창욱**                    |
-|:----:|:--------------------------:|:---------------------------:|:-----------------------------:|
-|E-Mail| normengdie@pusan.ac.kr     | hoondb@naver.com          | ckddnr5527@gmail.com                |
-|GitHub| [Normenghub](https://github.com/Normenghub) | [Pjhn](https://github.com/Pjhn) | [ichanguk](https://github.com/ichanguk) |
-|      | <img src="https://github.com/Normenghub.png" width=100px> | <img src="https://github.com/Pjhn.png" width=100px> | <img src="https://github.com/ichanguk.png" width=100px> |
+
+|      | **강수민**                        | **김상해**                      | **박민재**                     | **이성훈**                     |
+|:----:|:--------------------------------:|:-------------------------------:|:-----------------------------:|:------------------------------:|
+| E-Mail | ramiregi@pusan.ac.kr            | pelikan@pusan.ac.kr             | minjae4650@gmail.com           | p.plue1881@gmail.com           |
+| GitHub | [wvssm](https://github.com/wvssm) | [gobad820](https://github.com/gobad820) | [minjae4650](https://github.com/minjae4650) | [NextrPlue](https://github.com/NextrPlue) |
+|      | <img src="https://github.com/wvssm.png" width=100px> | <img src="https://github.com/gobad820.png" width=100px> | <img src="https://github.com/minjae4650.png" width=100px> | <img src="https://github.com/NextrPlue.png" width=100px> |
 
 </br>
 
