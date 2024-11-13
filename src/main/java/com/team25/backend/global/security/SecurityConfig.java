@@ -68,9 +68,28 @@ public class SecurityConfig {
         //경로별 인가 작업
         http
                 .authorizeHttpRequests((auth) -> auth
-                        .requestMatchers("/login", "/", "/join", "/reissue", "/auth/*", "/oauth2/callback/kakao","/api/users/me/role").permitAll()
-                        .requestMatchers("/my").hasRole("USER")
-                        .requestMatchers("api/manager/name").hasRole("MANAGER")
+                        .requestMatchers( "/",
+                                "/auth/**",
+                                "/oauth2/callback/kakao",
+                                "/address").permitAll()
+
+                        .requestMatchers("/api/users/**",
+                                "/api/tracking/**",
+                                "/api/reports/**",
+                                "/api/manager/name").hasAnyRole("USER", "MANAGER")
+
+                        .requestMatchers("/api/manager/profile/**").hasRole("USER")
+
+                        .requestMatchers("/api/reservations/manager",
+                                "/api/reservations/change/**",
+                                "/api/manager/tracking/**",
+                                "/api/manager/reports/**",
+                                "/api/manager/**").hasRole("MANAGER")
+
+                        .requestMatchers("/api/reservations/**",
+                                "api/managers/**",
+                                "api/payment/**").hasRole("USER")
+
                         .anyRequest().permitAll());
 
         // 예외 처리 핸들러 추가
