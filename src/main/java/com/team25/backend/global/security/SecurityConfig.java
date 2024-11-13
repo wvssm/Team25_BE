@@ -75,7 +75,8 @@ public class SecurityConfig {
 
                         .requestMatchers("/api/users/**",
                                 "/api/tracking/**",
-                                "/api/reports/**").hasAnyRole("USER", "MANAGER")
+                                "/api/reports/**",
+                                "/api/manager/name").hasAnyRole("USER", "MANAGER")
 
                         .requestMatchers("/api/manager/profile/**").hasRole("USER")
 
