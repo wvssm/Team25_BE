@@ -2,8 +2,8 @@ package com.team25.backend.global.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.team25.backend.domain.login.dto.request.LogoutRequest;
+import com.team25.backend.domain.login.service.ReissueService;
 import com.team25.backend.global.dto.response.ApiResponse;
-import com.team25.backend.domain.login.repository.RefreshRepository;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.UnsupportedJwtException;
@@ -21,12 +21,12 @@ import java.io.IOException;
 public class CustomLogoutFilter extends GenericFilterBean {
 
     private final JWTUtil jwtUtil;
-    private final RefreshRepository refreshRepository;
+    private final ReissueService reissueService;
     private final ObjectMapper objectMapper;
 
-    public CustomLogoutFilter(JWTUtil jwtUtil, RefreshRepository refreshRepository, ObjectMapper objectMapper) {
+    public CustomLogoutFilter(JWTUtil jwtUtil, ReissueService reissueService, ObjectMapper objectMapper) {
         this.jwtUtil = jwtUtil;
-        this.refreshRepository = refreshRepository;
+        this.reissueService = reissueService;
         this.objectMapper = objectMapper;
     }
 
@@ -90,13 +90,13 @@ public class CustomLogoutFilter extends GenericFilterBean {
         }
 
 
-        Boolean isExist = refreshRepository.existsByRefresh(refresh);
+        boolean isExist = reissueService.isRefreshTokenExisted(refresh);
         if (!isExist) {
             sendErrorResponse(response, HttpServletResponse.SC_BAD_REQUEST, "해당 Refresh 토큰이 존재하지 않습니다.");
             return;
         }
 
-        refreshRepository.deleteByRefresh(refresh);
+        reissueService.deleteRefreshToken(refresh);
 
         response.setStatus(HttpServletResponse.SC_OK);
         response.setContentType("application/json");
