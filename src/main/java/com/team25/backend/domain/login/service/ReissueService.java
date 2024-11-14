@@ -23,7 +23,6 @@ public class ReissueService {
         this.jwtService = jwtService;
     }
 
-
     public void validateRefreshToken(String refresh){
         jwtUtil.isExpired(refresh);
         validateTokenCategory(refresh);
