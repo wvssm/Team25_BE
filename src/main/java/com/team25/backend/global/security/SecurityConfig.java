@@ -57,6 +57,7 @@ public class SecurityConfig {
         http
                 .formLogin((auth) -> auth
                         .loginPage("/login")
+                        .failureHandler(new CustomAuthenticationFailureHandler())
                         .loginProcessingUrl("/loginProc")
                         .defaultSuccessUrl("/admin", true)
                         .permitAll());

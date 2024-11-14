@@ -71,8 +71,10 @@ public class JWTFilter extends OncePerRequestFilter {
 
         } catch (ExpiredJwtException e) {
             sendErrorResponse(response, "Access token이 만료되었습니다.", HttpServletResponse.SC_UNAUTHORIZED);
+
         } catch (MalformedJwtException | SignatureException | IllegalArgumentException e) {
             sendErrorResponse(response, "잘못된 토큰 형식입니다.", HttpServletResponse.SC_UNAUTHORIZED);
+
         } catch (CustomException e) {
             sendErrorResponse(response, e.getMessage(), HttpServletResponse.SC_NOT_FOUND);
         }
