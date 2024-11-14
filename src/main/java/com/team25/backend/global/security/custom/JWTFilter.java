@@ -1,9 +1,10 @@
-package com.team25.backend.global.security;
+package com.team25.backend.global.security.custom;
 
-import com.team25.backend.global.dto.CustomUserDetails;
 import com.team25.backend.domain.user.entity.User;
 import com.team25.backend.global.exception.CustomException;
 import com.team25.backend.domain.user.repository.UserRepository;
+import com.team25.backend.global.security.custom.CustomUserDetails;
+import com.team25.backend.global.util.JWTUtil;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.security.SignatureException;

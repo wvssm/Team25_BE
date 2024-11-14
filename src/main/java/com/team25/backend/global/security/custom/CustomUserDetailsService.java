@@ -1,14 +1,10 @@
-package com.team25.backend.domain.user.service;
+package com.team25.backend.global.security.custom;
 
-import com.team25.backend.global.dto.CustomUserDetails;
-import com.team25.backend.domain.user.entity.User;
 import com.team25.backend.domain.user.repository.UserRepository;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-
-import java.util.UUID;
 
 import static com.team25.backend.global.exception.ErrorCode.FAIL_LOGIN;
 

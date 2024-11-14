@@ -1,8 +1,10 @@
-package com.team25.backend.global.security;
+package com.team25.backend.global.security.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.team25.backend.domain.login.service.ReissueService;
 import com.team25.backend.domain.user.repository.UserRepository;
+import com.team25.backend.global.security.custom.*;
+import com.team25.backend.global.util.JWTUtil;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
