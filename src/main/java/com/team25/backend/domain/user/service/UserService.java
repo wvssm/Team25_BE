@@ -91,8 +91,4 @@ public class UserService {
 
         return new UserStatusResponse(description);
     }
-
-    public void deleteUserById(Long id) {
-        userRepository.deleteById(id);
-    }
 }
