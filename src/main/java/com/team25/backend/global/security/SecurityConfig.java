@@ -37,12 +37,11 @@ public class SecurityConfig {
 
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
-
         return configuration.getAuthenticationManager();
     }
+
     @Bean
     public BCryptPasswordEncoder bCryptPasswordEncoder() {
-
         return new BCryptPasswordEncoder();
     }
 
@@ -56,8 +55,10 @@ public class SecurityConfig {
 
         //From 로그인 방식 disable
         http
-                .formLogin((auth) -> auth.loginPage("/login")
+                .formLogin((auth) -> auth
+                        .loginPage("/login")
                         .loginProcessingUrl("/loginProc")
+                        .defaultSuccessUrl("/admin", true)
                         .permitAll());
 
         //http basic 인증 방식 disable
@@ -74,6 +75,8 @@ public class SecurityConfig {
                                 "/auth/**",
                                 "/oauth2/callback/kakao",
                                 "/address").permitAll()
+
+                        .requestMatchers("/admin/**").hasRole("ADMIN")
 
                         .requestMatchers("/api/users/**",
                                 "/api/tracking/**",
@@ -97,13 +100,12 @@ public class SecurityConfig {
         // 예외 처리 핸들러 추가
         http
                 .exceptionHandling(exception -> exception
-                .accessDeniedHandler(customAccessDeniedHandler)
-                .authenticationEntryPoint(customAuthenticationEntryPoint));
+                        .accessDeniedHandler(customAccessDeniedHandler)
+                        .authenticationEntryPoint(customAuthenticationEntryPoint));
 
         // JWT Filter
         http
-
-                .addFilterBefore(new JWTFilter(jwtUtil, userRepository), UsernamePasswordAuthenticationFilter.class);
+                .addFilterAfter(new JWTFilter(jwtUtil, userRepository), UsernamePasswordAuthenticationFilter.class);
 
         // Logout Filter
         http
@@ -112,7 +114,7 @@ public class SecurityConfig {
         //세션 설정
         http
                 .sessionManagement((session) -> session
-                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+                .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED));
 
         return http.build();
     }
@@ -124,4 +126,3 @@ public class SecurityConfig {
                 .requestMatchers("/error");
     }
 }
-

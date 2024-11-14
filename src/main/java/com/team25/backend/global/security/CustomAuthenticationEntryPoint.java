@@ -14,12 +14,18 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
 
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException {
-        response.setContentType("application/json");
-        response.setCharacterEncoding("UTF-8");
-        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        String requestURI = request.getRequestURI();
 
-        PrintWriter writer = response.getWriter();
-        writer.print("{\"status\": false, \"message\": \"인증되지 않은 사용자입니다.\", \"data\": null}");
-        writer.flush();
+        if (requestURI.startsWith("/admin")) {
+            response.sendRedirect("/login");
+        } else {
+            response.setContentType("application/json");
+            response.setCharacterEncoding("UTF-8");
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+
+            PrintWriter writer = response.getWriter();
+            writer.print("{\"status\": false, \"message\": \"인증되지 않은 사용자입니다.\", \"data\": null}");
+            writer.flush();
+        }
     }
 }
