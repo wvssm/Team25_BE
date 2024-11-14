@@ -242,5 +242,5 @@ java -jar backend-0.0.1-SNAPSHOT.jar
 
 <br>
 
-## 기술 스택
+## 서비스 아키텍처처
 ![기술 스택](https://github.com/user-attachments/assets/c976c69a-6596-4ec3-870d-2a360b81ec52)
