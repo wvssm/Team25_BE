@@ -1,9 +1,10 @@
-package com.team25.backend.global.security;
+package com.team25.backend.global.security.custom;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.team25.backend.domain.login.dto.request.LogoutRequest;
 import com.team25.backend.domain.login.service.ReissueService;
 import com.team25.backend.global.dto.response.ApiResponse;
+import com.team25.backend.global.util.JWTUtil;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.UnsupportedJwtException;

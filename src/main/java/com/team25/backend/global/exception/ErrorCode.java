@@ -16,7 +16,8 @@ public enum ErrorCode {
     TOKEN_EXPIRED(HttpStatus.BAD_REQUEST, "JWT 토큰이 만료되었습니다."),
     INVALID_FORMAT_TOKEN(HttpStatus.BAD_REQUEST, "잘못된 형식의 JWT 토큰입니다."),
     NOT_REFRESH_TOKEN(HttpStatus.BAD_REQUEST, "해당 JWT 토큰은 Refresh 토큰이 아닙니다."),
-    NOT_EXISTED_REFRESH_TOKEN(HttpStatus.BAD_REQUEST,"해당 Refresh 토큰이 존재하지 않습니다.");
+    NOT_EXISTED_REFRESH_TOKEN(HttpStatus.BAD_REQUEST,"해당 Refresh 토큰이 존재하지 않습니다."),
+    FAIL_LOGIN(HttpStatus.UNAUTHORIZED, "로그인을 실패했습니다.");
 
     private final HttpStatus status;
     private final String message;

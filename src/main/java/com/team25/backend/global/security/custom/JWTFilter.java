@@ -1,9 +1,10 @@
-package com.team25.backend.global.security;
+package com.team25.backend.global.security.custom;
 
-import com.team25.backend.global.dto.CustomUserDetails;
 import com.team25.backend.domain.user.entity.User;
 import com.team25.backend.global.exception.CustomException;
 import com.team25.backend.domain.user.repository.UserRepository;
+import com.team25.backend.global.security.custom.CustomUserDetails;
+import com.team25.backend.global.util.JWTUtil;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.security.SignatureException;
@@ -71,8 +72,10 @@ public class JWTFilter extends OncePerRequestFilter {
 
         } catch (ExpiredJwtException e) {
             sendErrorResponse(response, "Access token이 만료되었습니다.", HttpServletResponse.SC_UNAUTHORIZED);
+
         } catch (MalformedJwtException | SignatureException | IllegalArgumentException e) {
             sendErrorResponse(response, "잘못된 토큰 형식입니다.", HttpServletResponse.SC_UNAUTHORIZED);
+
         } catch (CustomException e) {
             sendErrorResponse(response, e.getMessage(), HttpServletResponse.SC_NOT_FOUND);
         }
