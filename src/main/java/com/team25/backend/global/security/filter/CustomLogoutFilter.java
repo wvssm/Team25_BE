@@ -1,4 +1,4 @@
-package com.team25.backend.global.security.custom.filter;
+package com.team25.backend.global.security.filter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.team25.backend.domain.login.dto.request.LogoutRequest;

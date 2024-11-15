@@ -1,7 +1,7 @@
 package com.team25.backend.global.resolver;
 
 import com.team25.backend.global.annotation.LoginUser;
-import com.team25.backend.global.security.custom.dto.CustomUserDetails;
+import com.team25.backend.global.security.dto.CustomUserDetails;
 import com.team25.backend.domain.user.entity.User;
 import com.team25.backend.global.exception.CustomException;
 import com.team25.backend.global.exception.ErrorCode;

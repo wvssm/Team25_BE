@@ -1,7 +1,8 @@
-package com.team25.backend.global.security.custom.service;
+package com.team25.backend.global.security.service;
 
 import com.team25.backend.domain.user.entity.User;
 import com.team25.backend.domain.user.repository.UserRepository;
+import com.team25.backend.global.security.service.CustomUserDetailsService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

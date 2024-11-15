@@ -1,11 +1,13 @@
-package com.team25.backend.global.security.config;
+package com.team25.backend.global.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.team25.backend.domain.login.service.ReissueService;
 import com.team25.backend.domain.user.repository.UserRepository;
-import com.team25.backend.global.security.custom.*;
-import com.team25.backend.global.security.custom.filter.CustomLogoutFilter;
-import com.team25.backend.global.security.custom.filter.JWTFilter;
+import com.team25.backend.global.security.filter.CustomLogoutFilter;
+import com.team25.backend.global.security.filter.JWTFilter;
+import com.team25.backend.global.security.handler.CustomAccessDeniedHandler;
+import com.team25.backend.global.security.handler.CustomAuthenticationEntryPoint;
+import com.team25.backend.global.security.handler.CustomAuthenticationFailureHandler;
 import com.team25.backend.global.util.JWTUtil;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
