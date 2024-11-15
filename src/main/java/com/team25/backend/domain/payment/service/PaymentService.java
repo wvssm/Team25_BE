@@ -91,6 +91,8 @@ public class PaymentService {
 
     // 빌링키 존재 여부 확인
     public Map<String, Object> billingKeyExists(String userUuid) {
+        userRepository.findByUuid(userUuid)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
         Optional<BillingKey> billingKeyOptional = billingKeyRepository.findByUserUuid(userUuid);
         Map<String, Object> response = new HashMap<>();
         if (billingKeyOptional.isPresent()) {
@@ -164,10 +166,10 @@ public class PaymentService {
 
     // 결제 요청
     public PaymentResponse requestPayment(String userUuid, PaymentRequest requestDto) throws Exception {
-        BillingKey billingKey = billingKeyRepository.findByUserUuid(userUuid)
-                .orElseThrow(() -> new CustomException(ErrorCode.BILLING_KEY_NOT_FOUND));
         User user = userRepository.findByUuid(userUuid)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+        BillingKey billingKey = billingKeyRepository.findByUserUuid(userUuid)
+                .orElseThrow(() -> new CustomException(ErrorCode.BILLING_KEY_NOT_FOUND));
 
         Reservation reservation = null;
         if (requestDto.reservationId() != null) {
