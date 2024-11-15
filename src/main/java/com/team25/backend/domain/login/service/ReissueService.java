@@ -4,7 +4,7 @@ import com.team25.backend.domain.login.dto.response.TokenResponse;
 import com.team25.backend.domain.login.repository.RefreshRepository;
 import com.team25.backend.domain.user.dto.response.UserResponse;
 import com.team25.backend.global.exception.CustomException;
-import com.team25.backend.global.security.JWTUtil;
+import com.team25.backend.global.util.JWTUtil;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,7 +22,6 @@ public class ReissueService {
         this.refreshRepository = refreshRepository;
         this.jwtService = jwtService;
     }
-
 
     public void validateRefreshToken(String refresh){
         jwtUtil.isExpired(refresh);

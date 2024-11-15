@@ -1,61 +1,61 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Managers</title>
-    <!-- Bootstrap CSS 추가 -->
+    <meta charset="UTF-8">
+    <title>매니저 목록</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link th:href="@{/css/managerList.css}" rel="stylesheet">
 </head>
 <body>
-<div class="container mt-5">
-    <h1 class="text-center mb-4">인증된 매니저들 목록</h1>
+<div class="sidebar">
+    <h3>Meditogether</h3>
+    <a th:href="@{/admin}">매니저 승인 페이지</a>
+    <a th:href="@{/admin/managers}">매니저 페이지</a>
+    <a th:href="@{/admin/users}">전체 사용자 목록</a>
+    <a th:href="@{/logout}">로그아웃</a>
+</div>
 
-    <!-- 뒤로가기 버튼 -->
-    <div class="mb-3">
-        <a th:href="@{/admin}" class="btn btn-secondary">뒤로가기</a>
+<div class="main-content">
+    <div class="header">
+        <h2>매니저 목록</h2>
     </div>
 
-    <table class="table table-bordered table-striped">
-        <thead class="thead-dark">
-        <tr>
-            <th>ID</th>
-            <th>Name</th>
-            <th>Profile Image</th>
-            <th>Career</th>
-            <th>Comment</th>
-            <th>Working Region</th>
-            <th>Gender</th>
-            <th>Working Hours</th>
-            <th>Certificates</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr th:each="manager : ${managers}">
-            <td th:text="${manager.id}"></td>
-            <td th:text="${manager.managerName}"></td>
-            <td><img th:src="${manager.profileImage}" alt="Profile Image" class="img-thumbnail" width="50"/></td>
-            <td th:text="${manager.career}"></td>
-            <td th:text="${manager.comment}"></td>
-            <td th:text="${manager.workingRegion}"></td>
-            <td th:text="${manager.gender}"></td>
-            <td>
-                <table class="table table-sm">
-                    <tr><td>Mon:</td><td th:text="${manager.workingHour.monStartTime} + ' - ' + ${manager.workingHour.monEndTime}"></td></tr>
-                    <tr><td>Tue:</td><td th:text="${manager.workingHour.tueStartTime} + ' - ' + ${manager.workingHour.tueEndTime}"></td></tr>
-                    <tr><td>Wed:</td><td th:text="${manager.workingHour.wedStartTime} + ' - ' + ${manager.workingHour.wedEndTime}"></td></tr>
-                    <tr><td>Thu:</td><td th:text="${manager.workingHour.thuStartTime} + ' - ' + ${manager.workingHour.thuEndTime}"></td></tr>
-                    <tr><td>Fri:</td><td th:text="${manager.workingHour.friStartTime} + ' - ' + ${manager.workingHour.friEndTime}"></td></tr>
-                    <tr><td>Sat:</td><td th:text="${manager.workingHour.satStartTime} + ' - ' + ${manager.workingHour.satEndTime}"></td></tr>
-                    <tr><td>Sun:</td><td th:text="${manager.workingHour.sunStartTime} + ' - ' + ${manager.workingHour.sunEndTime}"></td></tr>
-                </table>
-            </td>
-            <td>
-                <ul class="list-unstyled">
-                    <li th:each="certificate : ${manager.certificates}" th:text="${certificate.certificateImage}"></li>
-                </ul>
-            </td>
-        </tr>
-        </tbody>
-    </table>
+    <div class="table-container">
+        <table class="table table-hover">
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Career</th>
+                <th>Comment</th>
+                <th>Working Region</th>
+                <th>Gender</th>
+                <th>Working Hours</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="manager : ${managers}">
+                <td th:text="${manager.id}"></td>
+                <td th:text="${manager.managerName}"></td>
+                <td th:text="${manager.career}"></td>
+                <td th:text="${manager.comment}"></td>
+                <td th:text="${manager.workingRegion}"></td>
+                <td th:text="${manager.gender}"></td>
+                <td>
+                    <table class="table table-sm sub-table">
+                        <tr><td>Mon:</td><td th:text="${manager.workingHour.monStartTime} + ' - ' + ${manager.workingHour.monEndTime}"></td></tr>
+                        <tr><td>Tue:</td><td th:text="${manager.workingHour.tueStartTime} + ' - ' + ${manager.workingHour.tueEndTime}"></td></tr>
+                        <tr><td>Wed:</td><td th:text="${manager.workingHour.wedStartTime} + ' - ' + ${manager.workingHour.wedEndTime}"></td></tr>
+                        <tr><td>Thu:</td><td th:text="${manager.workingHour.thuStartTime} + ' - ' + ${manager.workingHour.thuEndTime}"></td></tr>
+                        <tr><td>Fri:</td><td th:text="${manager.workingHour.friStartTime} + ' - ' + ${manager.workingHour.friEndTime}"></td></tr>
+                        <tr><td>Sat:</td><td th:text="${manager.workingHour.satStartTime} + ' - ' + ${manager.workingHour.satEndTime}"></td></tr>
+                        <tr><td>Sun:</td><td th:text="${manager.workingHour.sunStartTime} + ' - ' + ${manager.workingHour.sunEndTime}"></td></tr>
+                    </table>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
 </div>
 
 <!-- Bootstrap JS, Popper.js, and jQuery 추가 -->

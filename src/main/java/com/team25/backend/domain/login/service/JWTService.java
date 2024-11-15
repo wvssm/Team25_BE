@@ -3,7 +3,7 @@ package com.team25.backend.domain.login.service;
 import com.team25.backend.domain.login.dto.response.TokenResponse;
 import com.team25.backend.domain.user.dto.response.UserResponse;
 import com.team25.backend.domain.login.entity.Refresh;
-import com.team25.backend.global.security.JWTUtil;
+import com.team25.backend.global.util.JWTUtil;
 import com.team25.backend.domain.login.repository.RefreshRepository;
 import org.springframework.stereotype.Service;
 
@@ -27,7 +27,7 @@ public class JWTService {
         Long accessTokenExpiry = 15 * minute;  // 15분
         Long refreshTokenExpiry = 30 * day;  // 30일
 
-        String access = jwtUtil.createJwt("access", userDto.uuid(), accessTokenExpiry );
+        String access = jwtUtil.createJwt("access", userDto.uuid(), accessTokenExpiry);
         String refresh = jwtUtil.createJwt("refresh", userDto.uuid(), refreshTokenExpiry);
         addRefresh(userDto.uuid(), refresh, 120000L);
 

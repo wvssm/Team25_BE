@@ -1,0 +1,75 @@
+body {
+    display: flex;
+    min-height: 100vh;
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background-color: #f8f9fa;
+}
+.sidebar {
+    width: 250px;
+    background-color: #343a40;
+    color: #fff;
+    padding: 20px;
+}
+.sidebar h3 {
+    font-size: 20px;
+    color: #ffc107;
+    margin-bottom: 20px;
+}
+.sidebar a {
+    color: #adb5bd;
+    display: block;
+    padding: 10px 0;
+    text-decoration: none;
+    font-size: 16px;
+}
+.sidebar a:hover {
+    color: #fff;
+    background-color: #495057;
+    border-radius: 4px;
+    padding-left: 10px;
+}
+.main-content {
+    flex: 1;
+    padding: 20px;
+}
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+.header h1 {
+    font-weight: bold;
+    color: #343a40;
+}
+.header h2 {
+    font-weight: bold;
+    color: #343a40;
+}
+.table-container {
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+}
+.table thead th {
+    background-color: #007bff;
+    color: #fff;
+    text-align: center;
+}
+.table tbody td {
+    text-align: center;
+}
+.btn-danger {
+    background-color: #dc3545;
+    border-color: #dc3545;
+}
+.btn-secondary {
+    color: #fff;
+    background-color: #6c757d;
+    border-color: #6c757d;
+}
+.btn-secondary:hover {
+    background-color: #5a6268;
+}

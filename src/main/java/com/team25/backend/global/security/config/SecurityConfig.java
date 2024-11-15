@@ -1,8 +1,10 @@
-package com.team25.backend.global.security;
+package com.team25.backend.global.security.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.team25.backend.domain.login.service.ReissueService;
 import com.team25.backend.domain.user.repository.UserRepository;
+import com.team25.backend.global.security.custom.*;
+import com.team25.backend.global.util.JWTUtil;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -37,12 +39,11 @@ public class SecurityConfig {
 
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
-
         return configuration.getAuthenticationManager();
     }
+
     @Bean
     public BCryptPasswordEncoder bCryptPasswordEncoder() {
-
         return new BCryptPasswordEncoder();
     }
 
@@ -56,7 +57,12 @@ public class SecurityConfig {
 
         //From 로그인 방식 disable
         http
-                .formLogin((auth) -> auth.disable());
+                .formLogin((auth) -> auth
+                        .loginPage("/login")
+                        .failureHandler(new CustomAuthenticationFailureHandler())
+                        .loginProcessingUrl("/loginProc")
+                        .defaultSuccessUrl("/admin", true)
+                        .permitAll());
 
         //http basic 인증 방식 disable
         http
@@ -67,16 +73,22 @@ public class SecurityConfig {
         http
                 .authorizeHttpRequests((auth) -> auth
                         .requestMatchers( "/",
+                                "/login",
+                                "/loginProc",
                                 "/auth/**",
                                 "/oauth2/callback/kakao",
                                 "/address").permitAll()
+
+                        .requestMatchers("/admin/**").hasRole("ADMIN")
 
                         .requestMatchers("/api/users/**",
                                 "/api/tracking/**",
                                 "/api/reports/**",
                                 "/api/manager/name").hasAnyRole("USER", "MANAGER")
 
-                        .requestMatchers("/api/manager/profile/**").hasRole("USER")
+                        .requestMatchers("/api/manager/profile/**",
+                                "/api/managers",
+                                "/api/manager").hasRole("USER")
 
                         .requestMatchers("/api/reservations/manager",
                                 "/api/reservations/change/**",
@@ -91,13 +103,12 @@ public class SecurityConfig {
         // 예외 처리 핸들러 추가
         http
                 .exceptionHandling(exception -> exception
-                .accessDeniedHandler(customAccessDeniedHandler)
-                .authenticationEntryPoint(customAuthenticationEntryPoint));
+                        .accessDeniedHandler(customAccessDeniedHandler)
+                        .authenticationEntryPoint(customAuthenticationEntryPoint));
 
         // JWT Filter
         http
-
-                .addFilterBefore(new JWTFilter(jwtUtil, userRepository), UsernamePasswordAuthenticationFilter.class);
+                .addFilterAfter(new JWTFilter(jwtUtil, userRepository), UsernamePasswordAuthenticationFilter.class);
 
         // Logout Filter
         http
@@ -106,7 +117,7 @@ public class SecurityConfig {
         //세션 설정
         http
                 .sessionManagement((session) -> session
-                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+                .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED));
 
         return http.build();
     }
@@ -118,4 +129,3 @@ public class SecurityConfig {
                 .requestMatchers("/error");
     }
 }
-
