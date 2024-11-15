@@ -11,8 +11,8 @@ import com.team25.backend.domain.payment.repository.PaymentRepository;
 import com.team25.backend.domain.reservation.repository.ReservationRepository;
 import com.team25.backend.domain.user.entity.User;
 import com.team25.backend.domain.user.repository.UserRepository;
-import com.team25.backend.global.exception.PaymentErrorCode;
-import com.team25.backend.global.exception.PaymentException;
+import com.team25.backend.global.exception.CustomException;
+import com.team25.backend.global.exception.ErrorCode;
 import com.team25.backend.global.util.EncryptionUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -57,11 +57,11 @@ class PaymentServiceTest {
         when(userRepository.findByUuid(userUuid)).thenReturn(Optional.of(user));
         when(billingKeyRepository.findByUserUuid(userUuid)).thenReturn(Optional.of(new BillingKey()));
 
-        PaymentException exception = assertThrows(PaymentException.class, () -> {
+        CustomException exception = assertThrows(CustomException.class, () -> {
             paymentService.createBillingKey(userUuid, requestDto);
         });
 
-        assertEquals(PaymentErrorCode.BILLING_KEY_EXISTS, exception.getErrorCode());
+        assertEquals(ErrorCode.BILLING_KEY_EXISTS, exception.getErrorCode());
     }
 
     @Test
@@ -72,11 +72,11 @@ class PaymentServiceTest {
 
         when(userRepository.findByUuid(userUuid)).thenReturn(Optional.empty());
 
-        PaymentException exception = assertThrows(PaymentException.class, () -> {
+        CustomException exception = assertThrows(CustomException.class, () -> {
             paymentService.createBillingKey(userUuid, requestDto);
         });
 
-        assertEquals(PaymentErrorCode.USER_NOT_FOUND, exception.getErrorCode());
+        assertEquals(ErrorCode.USER_NOT_FOUND, exception.getErrorCode());
     }
 
     @Test
@@ -87,11 +87,11 @@ class PaymentServiceTest {
 
         when(billingKeyRepository.findByUserUuid(userUuid)).thenReturn(Optional.empty());
 
-        PaymentException exception = assertThrows(PaymentException.class, () -> {
+        CustomException exception = assertThrows(CustomException.class, () -> {
             paymentService.expireBillingKey(userUuid, requestDto);
         });
 
-        assertEquals(PaymentErrorCode.BILLING_KEY_NOT_FOUND, exception.getErrorCode());
+        assertEquals(ErrorCode.BILLING_KEY_NOT_FOUND, exception.getErrorCode());
     }
 
     @Test
@@ -115,11 +115,11 @@ class PaymentServiceTest {
 
         when(billingKeyRepository.findByUserUuid(userUuid)).thenReturn(Optional.empty());
 
-        PaymentException exception = assertThrows(PaymentException.class, () -> {
+        CustomException exception = assertThrows(CustomException.class, () -> {
             paymentService.requestPayment(userUuid, requestDto);
         });
 
-        assertEquals(PaymentErrorCode.BILLING_KEY_NOT_FOUND, exception.getErrorCode());
+        assertEquals(ErrorCode.BILLING_KEY_NOT_FOUND, exception.getErrorCode());
     }
 
     @Test
@@ -131,11 +131,11 @@ class PaymentServiceTest {
         when(billingKeyRepository.findByUserUuid(userUuid)).thenReturn(Optional.of(new BillingKey()));
         when(userRepository.findByUuid(userUuid)).thenReturn(Optional.empty());
 
-        PaymentException exception = assertThrows(PaymentException.class, () -> {
+        CustomException exception = assertThrows(CustomException.class, () -> {
             paymentService.requestPayment(userUuid, requestDto);
         });
 
-        assertEquals(PaymentErrorCode.USER_NOT_FOUND, exception.getErrorCode());
+        assertEquals(ErrorCode.USER_NOT_FOUND, exception.getErrorCode());
     }
 
     @Test
@@ -149,11 +149,11 @@ class PaymentServiceTest {
         when(userRepository.findByUuid(userUuid)).thenReturn(Optional.of(new User()));
         when(reservationRepository.findById(reservationId)).thenReturn(Optional.empty());
 
-        PaymentException exception = assertThrows(PaymentException.class, () -> {
+        CustomException exception = assertThrows(CustomException.class, () -> {
             paymentService.requestPayment(userUuid, requestDto);
         });
 
-        assertEquals(PaymentErrorCode.RESERVATION_NOT_FOUND, exception.getErrorCode());
+        assertEquals(ErrorCode.RESERVATION_NOT_FOUND, exception.getErrorCode());
     }
 
     @Test
@@ -164,11 +164,11 @@ class PaymentServiceTest {
 
         when(paymentRepository.findByOrderId(requestDto.orderId())).thenReturn(Optional.empty());
 
-        PaymentException exception = assertThrows(PaymentException.class, () -> {
+        CustomException exception = assertThrows(CustomException.class, () -> {
             paymentService.requestCancel(userUuid, requestDto);
         });
 
-        assertEquals(PaymentErrorCode.PAYMENT_NOT_FOUND, exception.getErrorCode());
+        assertEquals(ErrorCode.PAYMENT_NOT_FOUND, exception.getErrorCode());
     }
 
     @Test
@@ -184,10 +184,50 @@ class PaymentServiceTest {
 
         when(paymentRepository.findByOrderId(requestDto.orderId())).thenReturn(Optional.of(payment));
 
-        PaymentException exception = assertThrows(PaymentException.class, () -> {
+        CustomException exception = assertThrows(CustomException.class, () -> {
             paymentService.requestCancel(userUuid, requestDto);
         });
 
-        assertEquals(PaymentErrorCode.PAYMENT_USER_MISMATCH, exception.getErrorCode());
+        assertEquals(ErrorCode.PAYMENT_USER_MISMATCH, exception.getErrorCode());
+    }
+
+    @Test
+    @DisplayName("결제 정보가 없는 경우 단일 결제정보 조회 시 예외 발생")
+    void getPaymentByOrderId_PaymentNotFound() {
+        String orderId = "testOrderId";
+
+        when(paymentRepository.findByOrderId(orderId)).thenReturn(Optional.empty());
+
+        CustomException exception = assertThrows(CustomException.class, () -> {
+            paymentService.getPaymentByOrderId(orderId);
+        });
+
+        assertEquals(ErrorCode.PAYMENT_NOT_FOUND, exception.getErrorCode());
+    }
+
+    @Test
+    @DisplayName("사용자 정보가 없는 경우 결제정보 목록 조회 시 예외 발생")
+    void getPaymentsByUserUuid_UserNotFound() {
+        String userUuid = "test-user-uuid";
+
+        when(userRepository.findByUuid(userUuid)).thenReturn(Optional.empty());
+
+        CustomException exception = assertThrows(CustomException.class, () -> {
+            paymentService.getPaymentsByUserUuid(userUuid);
+        });
+
+        assertEquals(ErrorCode.USER_NOT_FOUND, exception.getErrorCode());
+    }
+
+    @Test
+    @DisplayName("예약 정보가 없는 경우 예약별 결제정보 목록 조회 시 예외 발생")
+    void getPaymentsByReservationId_ReservationNotFound() {
+        Long reservationId = 1L;
+
+        when(paymentRepository.findByReservationId(reservationId)).thenReturn(Collections.emptyList());
+
+        List<?> payments = paymentService.getPaymentsByReservationId(reservationId);
+
+        assertTrue(payments.isEmpty());
     }
 }
