@@ -111,7 +111,7 @@ class JWTFilterTest {
     }
 
     @Test
-    @DisplayName("존재하지 않는 사용자 UUID로 인한 인증 실패할 경우 404 에러를 발생한다")
+    @DisplayName("존재하지 않는 사용자 UUID로 인한 인증 실패의 경우 404 에러를 발생한다")
     void doFilterInternal_userNotFound() throws ServletException, IOException {
         // given
         MockHttpServletRequest request = new MockHttpServletRequest();
