@@ -29,8 +29,7 @@ class BillingKeyRepositoryTest {
 
     @BeforeEach
     void setUp() {
-        user = new User("testUsername", "test-uuid", "ROLE_USER");
-        userRepository.save(user);
+        user = userRepository.save(new User("testUsername", "test-uuid", "ROLE_USER"));
     }
 
     @AfterEach
