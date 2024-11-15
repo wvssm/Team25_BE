@@ -216,7 +216,7 @@
 
 ## ERD
 
-![ERD](https://github.com/user-attachments/assets/9d17fb57-9a4c-4a0c-83e5-eb12b6f233e9)
+![ERD](https://github.com/user-attachments/assets/2d8a2b28-b6cb-4ffb-8268-247ba9a28b52)
 
 <br>
 
