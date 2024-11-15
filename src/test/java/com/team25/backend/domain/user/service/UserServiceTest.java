@@ -116,7 +116,7 @@ class UserServiceTest {
     }
 
     @Test
-    @DisplayName("사용자 ID로 사용자를 찾을 수 없는 경우 예외 발생")
+    @DisplayName("사용자 삭제 시 사용자를 찾을 수 없는 경우 예외 발생")
     void removeUser_userNotFound() {
         // given
         Long userId = 1L;

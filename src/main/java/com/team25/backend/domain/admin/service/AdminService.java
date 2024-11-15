@@ -23,27 +23,32 @@ public class AdminService {
     }
 
     public List<AdminPageResponse> getAllUsersWithManagers() {
-        String bucketName = "manager-app-storage";
-        int duration_minute = 10;
-        Duration duration = Duration.ofMinutes(duration_minute);
-
         return userRepository.findUsersWithManager().stream()
-                .map(user -> {
-                    Manager manager = user.getManager();
-                    List<String> certificateImages = manager.getCertificates().stream()
-                            .map(Certificate::getCertificateImage)
-                            .map(objectKey -> s3Service.generatePresignedUrl(bucketName, objectKey,duration).toString())
-                            .collect(Collectors.toList());
+                .map(this::mapToAdminPageResponse)
+                .collect(Collectors.toList());
+    }
 
-                    return new AdminPageResponse(
-                            user.getId(),
-                            user.getUsername(),
-                            user.getRole(),
-                            manager.getId(),
-                            manager.getManagerName(),
-                            certificateImages
-                    );
-                })
+    private AdminPageResponse mapToAdminPageResponse(User user) {
+        Manager manager = user.getManager();
+        List<String> certificateImages = getCertificateImages(manager);
+
+        return new AdminPageResponse(
+                user.getId(),
+                user.getUsername(),
+                user.getRole(),
+                manager.getId(),
+                manager.getManagerName(),
+                certificateImages
+        );
+    }
+
+    private List<String> getCertificateImages(Manager manager) {
+        String bucketName = "manager-app-storage";
+        Duration duration = Duration.ofMinutes(10);
+
+        return manager.getCertificates().stream()
+                .map(Certificate::getCertificateImage)
+                .map(objectKey -> s3Service.generatePresignedUrl(bucketName, objectKey, duration).toString())
                 .collect(Collectors.toList());
     }
 

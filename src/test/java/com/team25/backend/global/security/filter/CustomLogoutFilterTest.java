@@ -1,8 +1,9 @@
-package com.team25.backend.global.security.custom;
+package com.team25.backend.global.security.filter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.team25.backend.domain.login.dto.request.LogoutRequest;
 import com.team25.backend.domain.login.service.ReissueService;
+import com.team25.backend.global.security.filter.CustomLogoutFilter;
 import com.team25.backend.global.util.JWTUtil;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.MalformedJwtException;
@@ -47,7 +48,7 @@ class CustomLogoutFilterTest {
     }
 
     @Test
-    @DisplayName("유효한 로그아웃 요청 성공")
+    @DisplayName("유효한 로그아웃 요청은 성공한다")
     void doFilter_validLogoutRequest() throws IOException, ServletException {
         // given
         MockHttpServletRequest request = new MockHttpServletRequest("POST", "/auth/logout");
@@ -71,7 +72,7 @@ class CustomLogoutFilterTest {
     }
 
     @Test
-    @DisplayName("만료된 Refresh 토큰 요청")
+    @DisplayName("만료된 Refresh 토큰 요청 시 에러 메시지가 반환된다")
     void doFilter_expiredRefreshToken() throws IOException, ServletException {
         // given
         MockHttpServletRequest request = new MockHttpServletRequest("POST", "/auth/logout");
@@ -92,7 +93,7 @@ class CustomLogoutFilterTest {
     }
 
     @Test
-    @DisplayName("잘못된 형식의 Refresh 토큰 요청")
+    @DisplayName("잘못된 형식의 Refresh 토큰 요청 시 에러 메시지가 반환된다")
     void doFilter_malformedRefreshToken() throws IOException, ServletException {
         // given
         MockHttpServletRequest request = new MockHttpServletRequest("POST", "/auth/logout");
@@ -113,7 +114,7 @@ class CustomLogoutFilterTest {
     }
 
     @Test
-    @DisplayName("잘못된 서명의 Refresh 토큰 요청")
+    @DisplayName("잘못된 서명의 Refresh 토큰 요청 시 에러 메시지가 반환된다")
     void doFilter_signatureException() throws IOException, ServletException {
         // given
         MockHttpServletRequest request = new MockHttpServletRequest("POST", "/auth/logout");
@@ -134,7 +135,7 @@ class CustomLogoutFilterTest {
     }
 
     @Test
-    @DisplayName("존재하지 않는 Refresh 토큰 요청")
+    @DisplayName("존재하지 않는 Refresh 토큰 요청일 경우 에러 메시지가 반환된다")
     void doFilter_nonExistentRefreshToken() throws IOException, ServletException {
         // given
         MockHttpServletRequest request = new MockHttpServletRequest("POST", "/auth/logout");

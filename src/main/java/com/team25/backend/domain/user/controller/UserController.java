@@ -22,14 +22,14 @@ public class UserController {
 
     @GetMapping("/api/users/me/role")
     @ResponseBody
-    public ResponseEntity<ApiResponse<UserRoleResponse>> myAPI(@LoginUser User user){
+    public ResponseEntity<ApiResponse<UserRoleResponse>> getMyRole(@LoginUser User user){
         UserRoleResponse userRole = new UserRoleResponse(user.getRole());
         return ResponseEntity.ok(new ApiResponse<>(true,"사용자 역할 조회를 성공했습니다.",userRole));
     }
 
     @GetMapping("/api/users/me/status")
     @ResponseBody
-    public ResponseEntity<ApiResponse<UserStatusResponse>> myStatusAPI(@LoginUser User user){
+    public ResponseEntity<ApiResponse<UserStatusResponse>> getMyStatus(@LoginUser User user){
         UserStatusResponse userStatusResponse = userService.getUserStatusById(user.getId());
         return ResponseEntity.ok(new ApiResponse<>(true,"사용자 상태 조회를 성공했습니다.",userStatusResponse));
     }
