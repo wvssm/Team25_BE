@@ -1,7 +1,7 @@
 package com.team25.backend.global.resolver;
 
 import com.team25.backend.global.annotation.LoginUser;
-import com.team25.backend.global.dto.CustomUserDetails;
+import com.team25.backend.global.security.dto.CustomUserDetails;
 import com.team25.backend.domain.user.entity.User;
 import com.team25.backend.global.exception.CustomException;
 import com.team25.backend.global.exception.ErrorCode;
@@ -34,7 +34,7 @@ public class CustomAuthenticationPrincipalArgumentResolver implements HandlerMet
     public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer, NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        if(isAuthenticationUser(authentication)){
+        if(isNotAuthenticationUser(authentication)){
             log.info("Authentication 객체가 없거나, 익명 사용자 입니다.");
             return null;
         }
@@ -55,7 +55,7 @@ public class CustomAuthenticationPrincipalArgumentResolver implements HandlerMet
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
     }
 
-    private boolean isAuthenticationUser(Authentication authentication) {
+    private boolean isNotAuthenticationUser(Authentication authentication) {
         return authentication == null || authentication instanceof AnonymousAuthenticationToken;
     }
 }

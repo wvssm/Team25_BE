@@ -18,8 +18,7 @@ import com.team25.backend.domain.manager.entity.Certificate;
 import com.team25.backend.domain.user.entity.User;
 import com.team25.backend.domain.manager.entity.WorkingHour;
 import com.team25.backend.global.exception.CustomException;
-import com.team25.backend.global.exception.ManagerException;
-import com.team25.backend.global.exception.ManagerErrorCode;
+import com.team25.backend.global.exception.ErrorCode;
 import com.team25.backend.domain.manager.repository.ManagerRepository;
 import com.team25.backend.domain.manager.repository.CertificateRepository;
 import com.team25.backend.domain.manager.repository.WorkingHourRepository;
@@ -35,6 +34,7 @@ import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static com.team25.backend.global.exception.ErrorCode.MANAGER_ALREADY_EXISTS;
 import static com.team25.backend.global.exception.ErrorCode.MANAGER_NOT_FOUND;
 
 @Service
@@ -48,37 +48,40 @@ public class ManagerService {
 
     public List<ManagerByDateAndRegionResponse> getManagersByDateAndRegion(String date, String region) {
         validateDate(date);
-        validateRegion(region);
+
+        String regionPrefix = getRegionPrefix(region);
+        validateRegion(regionPrefix);
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         LocalDate localDate = LocalDate.parse(date, formatter);
         String dayOfWeek = localDate.getDayOfWeek().toString().toLowerCase();
 
-        List<Manager> managers = managerRepository.findByWorkingRegion(region).stream()
-            .filter(manager -> hasWorkingHoursOnDay(manager.getWorkingHour(), dayOfWeek))
-            .toList();
+        List<Manager> managers = managerRepository.findAll().stream()
+                .filter(manager -> hasWorkingHoursOnDay(manager.getWorkingHour(), dayOfWeek))
+                .filter(manager -> manager.getWorkingRegion().startsWith(regionPrefix))
+                .toList();
 
         return managers.stream()
-            .map(ManagerByDateAndRegionResponse::fromEntity)
-            .collect(Collectors.toList());
+                .map(ManagerByDateAndRegionResponse::fromEntity)
+                .collect(Collectors.toList());
     }
 
     private boolean hasWorkingHoursOnDay(WorkingHour workingHour, String dayOfWeek) {
         return switch (dayOfWeek) {
             case "monday" ->
-                !("00:00".equals(workingHour.getMonStartTime()) && "00:00".equals(workingHour.getMonEndTime()));
+                    !("00:00".equals(workingHour.getMonStartTime()) && "00:00".equals(workingHour.getMonEndTime()));
             case "tuesday" ->
-                !("00:00".equals(workingHour.getTueStartTime()) && "00:00".equals(workingHour.getTueEndTime()));
+                    !("00:00".equals(workingHour.getTueStartTime()) && "00:00".equals(workingHour.getTueEndTime()));
             case "wednesday" ->
-                !("00:00".equals(workingHour.getWedStartTime()) && "00:00".equals(workingHour.getWedEndTime()));
+                    !("00:00".equals(workingHour.getWedStartTime()) && "00:00".equals(workingHour.getWedEndTime()));
             case "thursday" ->
-                !("00:00".equals(workingHour.getThuStartTime()) && "00:00".equals(workingHour.getThuEndTime()));
+                    !("00:00".equals(workingHour.getThuStartTime()) && "00:00".equals(workingHour.getThuEndTime()));
             case "friday" ->
-                !("00:00".equals(workingHour.getFriStartTime()) && "00:00".equals(workingHour.getFriEndTime()));
+                    !("00:00".equals(workingHour.getFriStartTime()) && "00:00".equals(workingHour.getFriEndTime()));
             case "saturday" ->
-                !("00:00".equals(workingHour.getSatStartTime()) && "00:00".equals(workingHour.getSatEndTime()));
+                    !("00:00".equals(workingHour.getSatStartTime()) && "00:00".equals(workingHour.getSatEndTime()));
             case "sunday" ->
-                !("00:00".equals(workingHour.getSunStartTime()) && "00:00".equals(workingHour.getSunEndTime()));
+                    !("00:00".equals(workingHour.getSunStartTime()) && "00:00".equals(workingHour.getSunEndTime()));
             default -> false;
         };
     }
@@ -88,41 +91,50 @@ public class ManagerService {
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
             LocalDate.parse(date, formatter);
         } catch (DateTimeParseException e) {
-            throw new ManagerException(ManagerErrorCode.INVALID_DATE_FORMAT);
+            throw new CustomException(ErrorCode.INVALID_DATE_FORMAT);
         }
     }
 
-    private void validateRegion(String region) {
-        if (!regionExists(region)) {
-            throw new ManagerException(ManagerErrorCode.REGION_NOT_FOUND);
+    private String getRegionPrefix(String region) {
+        return region.length() >= 2 ? region.substring(0, 2) : region;
+    }
+
+
+    private void validateRegion(String regionPrefix) {
+        if (!regionExists(regionPrefix)) {
+            throw new CustomException(ErrorCode.REGION_NOT_FOUND);
         }
     }
 
     private boolean regionExists(String region) {
-        return List.of("Busan", "Seoul",
-            "부산광역시 중구", "부산광역시 서구", "부산광역시 동구", "부산광역시 영도구",
-            "부산광역시 부산진구", "부산광역시 동래구", "부산광역시 남구", "부산광역시 북구",
-            "부산광역시 해운대구", "부산광역시 사하구", "부산광역시 금정구", "부산광역시 강서구",
-            "부산광역시 연제구", "부산광역시 수영구", "부산광역시 사상구", "부산광역시 기장군").contains(region);
+        return List.of("서울",
+                "부산", "인천", "대구", "대전",
+                "광주", "울산", "세종", "경기",
+                "충남", "충북", "전남", "경북",
+                "경남", "강원", "전북", "제주").contains(region);
     }
 
     @Transactional
     public ManagerCreateResponse createManager(User user, ManagerCreateRequest request) {
         if (user.getId() == null) {
-            throw new ManagerException(ManagerErrorCode.UNAUTHORIZED);
+            throw new CustomException(ErrorCode.UNAUTHORIZED);
+        }
+
+        if(managerRepository.existsByUserId(user.getId())){
+            throw new CustomException(MANAGER_ALREADY_EXISTS);
         }
 
         validateCreateRequest(request);
 
         Manager manager = Manager.builder()
-            .user(user)
-            .managerName(request.name())
-            .profileImage(request.profileImage())
-            .career(request.career())
-            .comment(request.comment())
-            .gender(request.gender())
-            .isRegistered(false)
-            .build();
+                .user(user)
+                .managerName(request.name())
+                .profileImage(request.profileImage())
+                .career(request.career())
+                .comment(request.comment())
+                .gender(request.gender())
+                .isRegistered(false)
+                .build();
 
         WorkingHour workingHour = new WorkingHour();
         workingHour.setManager(manager);
@@ -131,36 +143,37 @@ public class ManagerService {
         managerRepository.save(manager);
 
         Certificate certificate = Certificate.builder()
-            .certificateImage(request.certificateImage())
-            .manager(manager)
-            .build();
+                .certificateImage(request.certificateImage())
+                .manager(manager)
+                .build();
 
         certificateRepository.save(certificate);
+        user.setManager(manager);
 
         return new ManagerCreateResponse();
     }
 
     private void validateCreateRequest(ManagerCreateRequest request) {
         if (request.name().isEmpty()) {
-            throw new ManagerException(ManagerErrorCode.INVALID_INPUT_VALUE);
+            throw new CustomException(ErrorCode.INVALID_INPUT_VALUE);
         }
     }
 
     public ManagerProfileResponse getManagerProfile(Long managerId) {
         Manager manager = managerRepository.findById(managerId)
-            .orElseThrow(() -> new ManagerException(ManagerErrorCode.MANAGER_NOT_FOUND));
+                .orElseThrow(() -> new CustomException(ErrorCode.MANAGER_NOT_FOUND));
 
         return ManagerProfileResponse.fromEntity(manager);
     }
 
     public ManagerProfileResponse getManagerProfile(User user) {
         if (user.getId() == null) {
-            throw new ManagerException(ManagerErrorCode.UNAUTHORIZED);
+            throw new CustomException(ErrorCode.UNAUTHORIZED);
         }
 
         Manager manager = user.getManager();
         if (manager == null) {
-            throw new ManagerException(ManagerErrorCode.MANAGER_NOT_FOUND);
+            throw new CustomException(ErrorCode.MANAGER_NOT_FOUND);
         }
 
         return ManagerProfileResponse.fromEntity(manager);
@@ -168,18 +181,18 @@ public class ManagerService {
 
     public ManagerWorkingHourUpdateResponse updateWorkingHour(User user, ManagerWorkingHourUpdateRequest request) {
         if (user.getId() == null) {
-            throw new ManagerException(ManagerErrorCode.UNAUTHORIZED);
+            throw new CustomException(ErrorCode.UNAUTHORIZED);
         }
 
         Manager manager = user.getManager();
 
         if (manager == null) {
-            throw new ManagerException(ManagerErrorCode.MANAGER_NOT_FOUND);
+            throw new CustomException(ErrorCode.MANAGER_NOT_FOUND);
         }
 
         WorkingHour workingHour = manager.getWorkingHour();
         if (workingHour == null) {
-            throw new ManagerException(ManagerErrorCode.WORKING_HOUR_NOT_FOUND);
+            throw new CustomException(ErrorCode.WORKING_HOUR_NOT_FOUND);
         }
 
         validateWorkingHourRequest(request);
@@ -216,17 +229,17 @@ public class ManagerService {
 
     private void validateWorkingHour(String startTime, String endTime) {
         if (!startTime.matches("\\d{2}:\\d{2}")) {
-            throw new ManagerException(ManagerErrorCode.INVALID_WORKING_HOUR_FORMAT);
+            throw new CustomException(ErrorCode.INVALID_WORKING_HOUR_FORMAT);
         }
         if (!endTime.matches("\\d{2}:\\d{2}")) {
-            throw new ManagerException(ManagerErrorCode.INVALID_WORKING_HOUR_FORMAT);
+            throw new CustomException(ErrorCode.INVALID_WORKING_HOUR_FORMAT);
         }
 
         LocalTime start = LocalTime.parse(startTime);
         LocalTime end = LocalTime.parse(endTime);
         if (!(start.equals(LocalTime.MIDNIGHT) && end.equals(LocalTime.MIDNIGHT))) {
             if (!start.isBefore(end)) {
-                throw new ManagerException(ManagerErrorCode.INVALID_TIME_RANGE);
+                throw new CustomException(ErrorCode.INVALID_TIME_RANGE);
             }
         }
     }
@@ -234,13 +247,13 @@ public class ManagerService {
 
     public ManagerProfileImageUpdateResponse updateProfileImage(User user, ManagerProfileImageUpdateRequest request) {
         if (user.getId() == null) {
-            throw new ManagerException(ManagerErrorCode.UNAUTHORIZED);
+            throw new CustomException(ErrorCode.UNAUTHORIZED);
         }
 
         Manager manager = user.getManager();
 
         if (manager == null) {
-            throw new ManagerException(ManagerErrorCode.MANAGER_NOT_FOUND);
+            throw new CustomException(ErrorCode.MANAGER_NOT_FOUND);
         }
 
         validateProfileImage(request.profileImage());
@@ -253,19 +266,19 @@ public class ManagerService {
 
     private void validateProfileImage(String profileImage) {
         if (profileImage == null || profileImage.isEmpty()) {
-            throw new ManagerException(ManagerErrorCode.INVALID_PROFILE_IMAGE);
+            throw new CustomException(ErrorCode.INVALID_PROFILE_IMAGE);
         }
     }
 
     public ManagerCommentUpdateResponse updateComment(User user, ManagerCommentUpdateRequest request) {
         if (user.getId() == null) {
-            throw new ManagerException(ManagerErrorCode.UNAUTHORIZED);
+            throw new CustomException(ErrorCode.UNAUTHORIZED);
         }
 
         Manager manager = user.getManager();
 
         if (manager == null) {
-            throw new ManagerException(ManagerErrorCode.MANAGER_NOT_FOUND);
+            throw new CustomException(ErrorCode.MANAGER_NOT_FOUND);
         }
 
         validateComment(request.comment());
@@ -278,19 +291,19 @@ public class ManagerService {
 
     private void validateComment(String comment) {
         if (comment == null || comment.isEmpty()) {
-            throw new ManagerException(ManagerErrorCode.INVALID_COMMENT);
+            throw new CustomException(ErrorCode.INVALID_COMMENT);
         }
     }
 
     public ManagerLocationUpdateResponse updateLocation(User user, ManagerLocationUpdateRequest request) {
         if (user.getId() == null) {
-            throw new ManagerException(ManagerErrorCode.UNAUTHORIZED);
+            throw new CustomException(ErrorCode.UNAUTHORIZED);
         }
 
         Manager manager = user.getManager();
 
         if (manager == null) {
-            throw new ManagerException(ManagerErrorCode.MANAGER_NOT_FOUND);
+            throw new CustomException(ErrorCode.MANAGER_NOT_FOUND);
         }
 
         validateWorkingRegion(request.workingRegion());
@@ -303,7 +316,7 @@ public class ManagerService {
 
     private void validateWorkingRegion(String workingRegion) {
         if (workingRegion == null || workingRegion.isEmpty()) {
-            throw new ManagerException(ManagerErrorCode.INVALID_WORKING_REGION);
+            throw new CustomException(ErrorCode.INVALID_WORKING_REGION);
         }
     }
 

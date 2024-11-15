@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.UUID;
+import com.github.f4b6a3.uuid.UuidCreator;
 import java.util.stream.Collectors;
 
 import static com.team25.backend.global.exception.ErrorCode.USER_NOT_FOUND;
@@ -32,7 +32,7 @@ public class UserService {
             throw new CustomException(ErrorCode.USER_ALREADY_EXISTS);
         }
 
-        String newUserUUID = UUID.randomUUID().toString();
+        String newUserUUID = UuidCreator.getTimeOrderedWithRandom().toString();
         User newUser = new User(userRequest.username(), newUserUUID,"ROLE_USER");
 
         User savedUser = userRepository.save(newUser);
@@ -90,9 +90,5 @@ public class UserService {
         }
 
         return new UserStatusResponse(description);
-    }
-
-    public void deleteUserById(Long id) {
-        userRepository.deleteById(id);
     }
 }

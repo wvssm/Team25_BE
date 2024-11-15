@@ -60,7 +60,7 @@ public class AdminController {
 
     @PostMapping("/admin/user/delete")
     public String deleteUserById(@RequestParam("userId") Long userId) {
-        userService.deleteUserById(userId);
+        userService.removeUser(userId);
         return "redirect:/admin/users";
     }
 

@@ -1,25 +1,27 @@
 package com.team25.backend.domain.reservation.service;
 
-import static com.team25.backend.global.exception.ReservationErrorCode.INVALID_ARRIVAL_ADDRESS;
-import static com.team25.backend.global.exception.ReservationErrorCode.INVALID_CANCEL_REASON;
-import static com.team25.backend.global.exception.ReservationErrorCode.INVALID_DATETIME_FORMAT;
-import static com.team25.backend.global.exception.ReservationErrorCode.INVALID_DEPARTRUE_ADDRESS;
-import static com.team25.backend.global.exception.ReservationErrorCode.INVALID_NOK_PHONE;
-import static com.team25.backend.global.exception.ReservationErrorCode.INVALID_PATIENT_BIRTHDATE;
-import static com.team25.backend.global.exception.ReservationErrorCode.INVALID_PATIENT_GENDER;
-import static com.team25.backend.global.exception.ReservationErrorCode.INVALID_PATIENT_NAME;
-import static com.team25.backend.global.exception.ReservationErrorCode.INVALID_PATIENT_PHONE;
-import static com.team25.backend.global.exception.ReservationErrorCode.INVALID_PATIENT_RELATION;
-import static com.team25.backend.global.exception.ReservationErrorCode.INVALID_PRICE;
-import static com.team25.backend.global.exception.ReservationErrorCode.INVALID_SERVICE_TYPE;
-import static com.team25.backend.global.exception.ReservationErrorCode.INVALID_TRANSPORTATION_TYPE;
-import static com.team25.backend.global.exception.ReservationErrorCode.MANAGER_NOT_FOUND;
-import static com.team25.backend.global.exception.ReservationErrorCode.NOT_MANAGER;
-import static com.team25.backend.global.exception.ReservationErrorCode.PATIENT_REQUIRED;
-import static com.team25.backend.global.exception.ReservationErrorCode.RESERVATION_ALREADY_CANCELED;
-import static com.team25.backend.global.exception.ReservationErrorCode.RESERVATION_NOT_BELONG_TO_USER;
-import static com.team25.backend.global.exception.ReservationErrorCode.RESERVATION_NOT_FOUND;
-import static com.team25.backend.global.exception.ReservationErrorCode.USER_NOT_FOUND;
+import static com.team25.backend.global.exception.ErrorCode.CANCEL_REASON_REQUIRED;
+import static com.team25.backend.global.exception.ErrorCode.INVALID_ARRIVAL_ADDRESS;
+import static com.team25.backend.global.exception.ErrorCode.INVALID_CANCEL_REASON;
+import static com.team25.backend.global.exception.ErrorCode.INVALID_DATETIME_FORMAT;
+import static com.team25.backend.global.exception.ErrorCode.INVALID_DEPARTRUE_ADDRESS;
+import static com.team25.backend.global.exception.ErrorCode.INVALID_NOK_PHONE;
+import static com.team25.backend.global.exception.ErrorCode.INVALID_PATIENT_BIRTHDATE;
+import static com.team25.backend.global.exception.ErrorCode.INVALID_PATIENT_GENDER;
+import static com.team25.backend.global.exception.ErrorCode.INVALID_PATIENT_NAME;
+import static com.team25.backend.global.exception.ErrorCode.INVALID_PATIENT_PHONE;
+import static com.team25.backend.global.exception.ErrorCode.INVALID_PATIENT_RELATION;
+import static com.team25.backend.global.exception.ErrorCode.INVALID_PRICE;
+import static com.team25.backend.global.exception.ErrorCode.INVALID_RESERVATION_STATUS;
+import static com.team25.backend.global.exception.ErrorCode.INVALID_SERVICE_TYPE;
+import static com.team25.backend.global.exception.ErrorCode.INVALID_TRANSPORTATION_TYPE;
+import static com.team25.backend.global.exception.ErrorCode.MANAGER_NOT_FOUND;
+import static com.team25.backend.global.exception.ErrorCode.NOT_MANAGER;
+import static com.team25.backend.global.exception.ErrorCode.PATIENT_REQUIRED;
+import static com.team25.backend.global.exception.ErrorCode.RESERVATION_ALREADY_CANCELED;
+import static com.team25.backend.global.exception.ErrorCode.RESERVATION_NOT_BELONG_TO_USER;
+import static com.team25.backend.global.exception.ErrorCode.RESERVATION_NOT_FOUND;
+import static com.team25.backend.global.exception.ErrorCode.USER_NOT_FOUND;
 
 import com.team25.backend.domain.manager.entity.Manager;
 import com.team25.backend.domain.manager.repository.ManagerRepository;
@@ -39,8 +41,7 @@ import com.team25.backend.domain.reservation.enumdomain.ServiceType;
 import com.team25.backend.domain.reservation.enumdomain.Transportation;
 import com.team25.backend.domain.reservation.repository.ReservationRepository;
 import com.team25.backend.domain.user.entity.User;
-import com.team25.backend.global.exception.ReservationErrorCode;
-import com.team25.backend.global.exception.ReservationException;
+import com.team25.backend.global.exception.CustomException;
 import jakarta.transaction.Transactional;
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDateTime;
@@ -73,7 +74,7 @@ public class ReservationService {
     public List<ReservationResponse> getAllReservations(User user) {
         List<Reservation> reservations = reservationRepository.findByUser_Uuid(user.getUuid());
         if (reservations.isEmpty()) {
-            throw new ReservationException(RESERVATION_NOT_FOUND);
+            throw new CustomException(RESERVATION_NOT_FOUND);
         }
         List<ReservationResponse> responseList = new ArrayList<>();
         for (Reservation reservation : reservations) {
@@ -87,13 +88,13 @@ public class ReservationService {
     // 단일 예약 조회
     public ReservationResponse getReservationById(User user, Long reservationId) {
         Reservation reservation = reservationRepository.findById(reservationId)
-            .orElseThrow(() -> new ReservationException(RESERVATION_NOT_FOUND));
+            .orElseThrow(() -> new CustomException(RESERVATION_NOT_FOUND));
         List<Reservation> reservations = reservationRepository.findByUser_Uuid(user.getUuid());
         if (reservations.isEmpty()) {
-            throw new ReservationException(USER_NOT_FOUND);
+            throw new CustomException(USER_NOT_FOUND);
         }
         if (!reservations.contains(reservation)) {
-            throw new ReservationException(RESERVATION_NOT_BELONG_TO_USER);
+            throw new CustomException(RESERVATION_NOT_BELONG_TO_USER);
         }
 
         return getReservationResponse(reservation);
@@ -104,7 +105,7 @@ public class ReservationService {
         validateReservationRequest(reservationRequest);
         LocalDateTime reservationDateTime = getLocalDateTime(reservationRequest);
         Manager manager = managerRepository.findById(reservationRequest.managerId())
-            .orElseThrow(() -> new ReservationException(MANAGER_NOT_FOUND));
+            .orElseThrow(() -> new CustomException(MANAGER_NOT_FOUND));
         Patient patient = patientService.addPatient(reservationRequest.patient());
         Reservation reservation = getReservation(reservationRequest, user, reservationDateTime, patient, manager);
         reservationRepository.save(reservation);
@@ -118,13 +119,13 @@ public class ReservationService {
         validateCancelReason(cancelRequest);
         List<Reservation> reservations = reservationRepository.findByUser_Uuid(user.getUuid());
         if (reservations.isEmpty()) {
-            throw new ReservationException(USER_NOT_FOUND);
+            throw new CustomException(USER_NOT_FOUND);
         }
         Reservation canceledReservation = reservations.stream()
             .filter(x -> x.getId().equals(reservationId)).findFirst()
-            .orElseThrow(() -> new ReservationException(RESERVATION_NOT_FOUND));
+            .orElseThrow(() -> new CustomException(RESERVATION_NOT_FOUND));
         if (canceledReservation.getReservationStatus() == ReservationStatus.CANCEL) {
-            throw new ReservationException(RESERVATION_ALREADY_CANCELED);
+            throw new CustomException(RESERVATION_ALREADY_CANCELED);
         }
         CancelReason cancelReason = cancelRequest.cancelReason();
         addCancelReasonAndDetail(canceledReservation, cancelReason,
@@ -134,30 +135,37 @@ public class ReservationService {
     }
 
     // 예약 상태 변경
-
     public ReservationResponse changeReservationStatus(User user, Long reservationId,
         ReservationstatusRequest reservationstatusRequest) {
         if (!Arrays.stream(ReservationStatus.values()).toList()
             .contains(reservationstatusRequest.reservationStatus())) {
-            throw new ReservationException(ReservationErrorCode.INVALID_RESERVATION_STATUS);
+            throw new CustomException(INVALID_RESERVATION_STATUS);
         }
-        Reservation reservation = reservationRepository.findById(reservationId)
-            .orElseThrow(() -> new ReservationException(RESERVATION_NOT_FOUND));
-        if (!user.getReservations().contains(reservation)) {
-            throw new ReservationException(RESERVATION_NOT_BELONG_TO_USER);
+        List<Reservation> managerReservationList = reservationRepository.findByManager_Id(user.getManager().getId());
+        if(managerReservationList.isEmpty()){
+            throw new CustomException(RESERVATION_NOT_FOUND);
         }
-        reservation.setReservationStatus(reservationstatusRequest.reservationStatus());
-        reservationRepository.save(reservation);
-        return getReservationResponse(reservation);
+        for (Reservation reservation : managerReservationList) {
+            if(reservation.getId().equals(reservationId)) {
+                reservation.setReservationStatus(reservationstatusRequest.reservationStatus());
+                reservationRepository.save(reservation);
+                return getReservationResponse(reservation);
+            }
+        }
+        throw new CustomException(RESERVATION_NOT_BELONG_TO_USER);
     }
 
-    public List<ReservationResponse> getManagerReservation(User user) {
+    // 매니저 담당 예약 리스트
+    public List<ReservationResponse> getManagerReservation(User user) { // ManagerUser
         if(!user.getRole().equals("ROLE_MANAGER")){
-            throw new ReservationException(NOT_MANAGER);
+            throw new CustomException(NOT_MANAGER);
         }
-        List<Reservation> allReservation = reservationRepository.findAll();
+        if (user.getManager() == null) {
+            throw new CustomException(MANAGER_NOT_FOUND);
+        }
+        List<Reservation> allReservation = reservationRepository.findByManager_Id(user.getManager().getId());
         if(allReservation.isEmpty()){
-            throw new ReservationException(RESERVATION_NOT_FOUND);
+            throw new CustomException(RESERVATION_NOT_FOUND);
         }
         List<ReservationResponse> responseList = new ArrayList<>();
         for (Reservation reservation : allReservation) {
@@ -170,13 +178,13 @@ public class ReservationService {
 
     private static void validateCancelReason(CancelRequest cancelRequest) {
         if(cancelRequest.cancelDetail().isEmpty()){
-            throw new ReservationException(ReservationErrorCode.CANCEL_REASON_REQUIRED);
+            throw new CustomException(CANCEL_REASON_REQUIRED);
         }
         if (cancelRequest.cancelReason() == null) {
-            throw new ReservationException(ReservationErrorCode.CANCEL_REASON_REQUIRED);
+            throw new CustomException(CANCEL_REASON_REQUIRED);
         }
         if(!Arrays.stream(CancelReason.values()).toList().contains(cancelRequest.cancelReason())){
-            throw new ReservationException(INVALID_CANCEL_REASON);
+            throw new CustomException(INVALID_CANCEL_REASON);
         }
     }
 
@@ -225,6 +233,7 @@ public class ReservationService {
             .patient(patient)
             .manager(manager)
             .user(user)
+            .reports(new ArrayList<>())
             .build();
     }
 
@@ -233,7 +242,7 @@ public class ReservationService {
         return LocalDateTime.parse(reservationRequest.reservationDateTime(), formatter);
     }
 
-   public static void validateReservationRequest(ReservationRequest request) {
+    protected static void validateReservationRequest(ReservationRequest request) {
        validateLocations(request.departureLocation(), request.arrivalLocation());
        validateDateTime(request.reservationDateTime());
        validateTypes(request.serviceType(), request.transportation());
@@ -244,73 +253,73 @@ public class ReservationService {
 
    private static void validateLocations(String departure, String arrival) {
        if (departure == null || departure.isEmpty() || departure.isBlank()) {
-           throw new ReservationException(INVALID_DEPARTRUE_ADDRESS);
+           throw new CustomException(INVALID_DEPARTRUE_ADDRESS);
        }
        if (arrival == null || arrival.isEmpty() || arrival.isBlank()) {
-           throw new ReservationException(INVALID_ARRIVAL_ADDRESS);
+           throw new CustomException(INVALID_ARRIVAL_ADDRESS);
        }
    }
 
    private static void validateDateTime(String dateTime) {
        if (dateTime == null || dateTime.isEmpty()) {
-           throw new ReservationException(INVALID_DATETIME_FORMAT);
+           throw new CustomException(INVALID_DATETIME_FORMAT);
        }
        try {
            if (!dateTime.matches("\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}")) {
-               throw new ReservationException(INVALID_DATETIME_FORMAT);
+               throw new CustomException(INVALID_DATETIME_FORMAT);
            }
        } catch (Exception e) {
-           throw new ReservationException(INVALID_DATETIME_FORMAT);
+           throw new CustomException(INVALID_DATETIME_FORMAT);
        }
    }
 
    private static void validateTypes(ServiceType serviceType, Transportation transportation) {
        if (serviceType == null) {
-           throw new ReservationException(INVALID_SERVICE_TYPE);
+           throw new CustomException(INVALID_SERVICE_TYPE);
        }
        if (!Arrays.stream(ServiceType.values()).toList().contains(serviceType)) {
-           throw new ReservationException(INVALID_SERVICE_TYPE);
+           throw new CustomException(INVALID_SERVICE_TYPE);
        }
 
        if (transportation == null) {
-           throw new ReservationException(INVALID_TRANSPORTATION_TYPE);
+           throw new CustomException(INVALID_TRANSPORTATION_TYPE);
        }
        if (!Arrays.stream(Transportation.values()).toList().contains(transportation)) {
-           throw new ReservationException(INVALID_TRANSPORTATION_TYPE);
+           throw new CustomException(INVALID_TRANSPORTATION_TYPE);
        }
    }
 
    private static void validatePrice(int price) {
        if (price < 0) {
-           throw new ReservationException(INVALID_PRICE);
+           throw new CustomException(INVALID_PRICE);
        }
    }
 
    private static void validatePatient(@NotNull PatientRequest patient) {
        if (patient == null) {
-           throw new ReservationException(PATIENT_REQUIRED);
+           throw new CustomException(PATIENT_REQUIRED);
        }
        validatePatientFields(patient);
    }
 
    private static void validatePatientFields(PatientRequest patient) {
        if (patient.name() == null || patient.name().isEmpty()) {
-           throw new ReservationException(INVALID_PATIENT_NAME);
+           throw new CustomException(INVALID_PATIENT_NAME);
        }
        if (patient.phoneNumber() == null || !patient.phoneNumber().matches("\\d{3}-\\d{4}-\\d{4}")) {
-           throw new ReservationException(INVALID_PATIENT_PHONE);
+           throw new CustomException(INVALID_PATIENT_PHONE);
        }
        if (patient.patientGender() == null || !Arrays.stream(PatientGender.values()).toList().contains(patient.patientGender())) {
-           throw new ReservationException(INVALID_PATIENT_GENDER);
+           throw new CustomException(INVALID_PATIENT_GENDER);
        }
        if (patient.patientRelation() == null || patient.patientRelation().isEmpty()) {
-           throw new ReservationException(INVALID_PATIENT_RELATION);
+           throw new CustomException(INVALID_PATIENT_RELATION);
        }
        if (patient.birthDate() == null || !patient.birthDate().matches("\\d{4}-\\d{2}-\\d{2}")) {
-           throw new ReservationException(INVALID_PATIENT_BIRTHDATE);
+           throw new CustomException(INVALID_PATIENT_BIRTHDATE);
        }
        if (patient.nokPhone() == null || !patient.nokPhone().matches("\\d{3}-\\d{4}-\\d{4}")) {
-           throw new ReservationException(INVALID_NOK_PHONE);
+           throw new CustomException(INVALID_NOK_PHONE);
        }
    }
 }

@@ -10,4 +10,5 @@ import org.springframework.stereotype.Repository;
 public interface ReservationRepository extends JpaRepository<Reservation, Long>,
     JpaSpecificationExecutor<Reservation> {
     List<Reservation> findByUser_Uuid(String userUuid);
+    List<Reservation> findByManager_Id(Long managerId);
 }

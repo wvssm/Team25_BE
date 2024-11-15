@@ -35,6 +35,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import lombok.ToString.Exclude;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 @Getter
 @Setter
@@ -53,11 +55,13 @@ public class Reservation {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "manager_id", nullable = false)
+    @JoinColumn(name = "manager_id", nullable = true)
+    @OnDelete(action = OnDeleteAction.SET_NULL)
     private Manager manager;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
+    @JoinColumn(name = "user_id", nullable = true)
+    @OnDelete(action = OnDeleteAction.SET_NULL)
     private User user;
 
     @Column(name = "departure_location", nullable = false) // ERD 컬럼 이름 변경 요망

@@ -8,7 +8,6 @@ import com.team25.backend.domain.reservation.service.ReservationService;
 import com.team25.backend.domain.user.entity.User;
 import com.team25.backend.global.annotation.LoginUser;
 import com.team25.backend.global.dto.response.ApiResponse;
-import jakarta.validation.Valid;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -22,7 +21,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@Slf4j
 @RequestMapping("/api/reservations")
 public class ReservationController {
 
@@ -35,7 +33,7 @@ public class ReservationController {
     @PostMapping
     public ResponseEntity<ApiResponse<ReservationResponse>> createReservation(
         @LoginUser User user,
-        @Valid @RequestBody ReservationRequest reservationRequest) {
+        @RequestBody ReservationRequest reservationRequest) {
         return new ResponseEntity<>(new ApiResponse<>(true, "예약이 접수되었습니다",
             reservationService.createReservation(reservationRequest, user)
         ), HttpStatus.CREATED);
@@ -44,7 +42,7 @@ public class ReservationController {
     @PatchMapping("/cancel/{reservation_id}")
     public ResponseEntity<ApiResponse<ReservationResponse>> cancelReservation(
         @LoginUser User user, @PathVariable(name = "reservation_id") Long reservationId,
-        @Valid @RequestBody CancelRequest cancelRequest) {
+        @RequestBody CancelRequest cancelRequest) {
         return new ResponseEntity<>(new ApiResponse<>(true, "예약 취수가 접수되었습니다",
             reservationService.cancelReservation(user, cancelRequest, reservationId)),
             HttpStatus.OK);

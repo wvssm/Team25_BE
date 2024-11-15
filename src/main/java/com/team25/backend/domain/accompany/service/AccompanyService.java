@@ -1,18 +1,19 @@
 package com.team25.backend.domain.accompany.service;
 
-import com.team25.backend.domain.accompany.dto.request.AccompanyLocationRequest;
+import static com.team25.backend.global.exception.ErrorCode.INVALID_ACCOMPANY_STATUS;
+import static com.team25.backend.global.exception.ErrorCode.REQUIRED_DATE_MISSING;
+import static com.team25.backend.global.exception.ErrorCode.REQUIRED_DESCRIPTION_MISSING;
+import static com.team25.backend.global.exception.ErrorCode.RESERVATION_NOT_FOUND;
+import static com.team25.backend.global.exception.ErrorCode.RESERVATION_WITHOUT_ACCOMPANY;
+
 import com.team25.backend.domain.accompany.dto.request.AccompanyRequest;
-import com.team25.backend.domain.accompany.dto.response.AccompanyCoordinateResponse;
 import com.team25.backend.domain.accompany.dto.response.AccompanyResponse;
 import com.team25.backend.domain.accompany.entity.Accompany;
-import com.team25.backend.domain.reservation.entity.Reservation;
 import com.team25.backend.domain.accompany.enumdomain.AccompanyStatus;
-import com.team25.backend.global.exception.AccompanyErrorCode;
-import com.team25.backend.global.exception.AccompanyException;
-import com.team25.backend.global.exception.ReservationErrorCode;
-import com.team25.backend.global.exception.ReservationException;
 import com.team25.backend.domain.accompany.repository.AccompanyRepository;
+import com.team25.backend.domain.reservation.entity.Reservation;
 import com.team25.backend.domain.reservation.repository.ReservationRepository;
+import com.team25.backend.global.exception.CustomException;
 import jakarta.transaction.Transactional;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -43,30 +44,13 @@ public class AccompanyService {
             .peek(response -> log.info("Accompany details: {}", response)).toList();
     }
 
-    public AccompanyCoordinateResponse getLatestLocation(Long reservationId) {
-        checkReservationNull(reservationId);
-        List<Accompany> searchedAccompanies = accompanyRepository.findByReservation_id(reservationId);
-        checkListEmpty(searchedAccompanies);
-        return searchedAccompanies.stream().map(AccompanyService::getAccompanyCoordinateResponse)
-            .peek(reseponse -> log.info("Accompany details: {}", reseponse)).toList().getLast();
-    }
-
-
-    public AccompanyCoordinateResponse updateLatestLocation(Long reservationId, AccompanyLocationRequest accompanyLocationRequest) {
-        checkReservationNull(reservationId);
-        Accompany latestAccompany = accompanyRepository.findByReservation_id(reservationId).getLast();
-        latestAccompany.setLongitude(Double.parseDouble(accompanyLocationRequest.longitude()));
-        latestAccompany.setLatitude(Double.parseDouble(accompanyLocationRequest.latitude()));
-        accompanyRepository.save(latestAccompany);
-        return getAccompanyCoordinateResponse(latestAccompany);
-    }
 
     public AccompanyResponse addTrackingAccompany(Long reservationId,
         AccompanyRequest accompanyRequest) {
         validateAccompanyRequest(accompanyRequest);
         LocalDateTime accompanyDateTime = getLocalDateTime(accompanyRequest);
         Reservation reservation = reservationRepository.findById(reservationId).orElseThrow(
-            () -> new ReservationException(ReservationErrorCode.RESERVATION_NOT_FOUND));
+            () -> new CustomException(RESERVATION_NOT_FOUND));
         Accompany track = getAccompany(accompanyRequest, accompanyDateTime);
         accompanyRepository.save(track);
         reservation.addAccompany(track);
@@ -84,45 +68,36 @@ public class AccompanyService {
             track.getDetail());
     }
 
-    private static AccompanyCoordinateResponse getAccompanyCoordinateResponse(Accompany track) {
-        return new AccompanyCoordinateResponse(track.getLatitude(), track.getLongitude());
-    }
 
     private static Accompany getAccompany(AccompanyRequest accompanyRequest,
         LocalDateTime accompanyDateTime) {
         return Accompany.builder().accompanyStatus(accompanyRequest.status())
-            .time(accompanyDateTime).latitude(accompanyRequest.latitude())
-            .longitude(accompanyRequest.longitude()).detail(accompanyRequest.statusDescribe())
+            .time(accompanyDateTime)
+            .detail(accompanyRequest.statusDescribe())
             .build();
     }
 
     private void checkReservationNull(Long reservationId) {
         if (reservationRepository.findById(reservationId).isEmpty()) {
-            throw new ReservationException(ReservationErrorCode.RESERVATION_NOT_FOUND);
+            throw new CustomException(RESERVATION_NOT_FOUND);
         }
     }
 
     private static void checkListEmpty(List<Accompany> searchedAccompanies) {
         if (searchedAccompanies.isEmpty()) {
-            throw new ReservationException(ReservationErrorCode.RESERVATION_WITHOUT_ACCOMPANY);
+            throw new CustomException(RESERVATION_WITHOUT_ACCOMPANY);
         }
     }
 
     private static void validateAccompanyRequest(AccompanyRequest accompanyRequest) {
-        if(!Arrays.stream(AccompanyStatus.values()).toList().contains(accompanyRequest.status())) {
-            throw new AccompanyException(AccompanyErrorCode.INVALID_ACCOMPANY_STATUS);
+        if (!Arrays.stream(AccompanyStatus.values()).toList().contains(accompanyRequest.status())) {
+            throw new CustomException(INVALID_ACCOMPANY_STATUS);
         }
-        if( accompanyRequest.latitude() == null || accompanyRequest.latitude() < 0 || accompanyRequest.latitude() > 90 ) {
-            throw new AccompanyException(AccompanyErrorCode.INVALID_LATITUDE);
+        if (accompanyRequest.statusDate().isEmpty()) {
+            throw new CustomException(REQUIRED_DATE_MISSING);
         }
-        if( accompanyRequest.longitude() == null || accompanyRequest.longitude() < 0 || accompanyRequest.longitude() > 180 ) {
-            throw new AccompanyException(AccompanyErrorCode.INVALID_LONGITUDE);
-        }
-        if(accompanyRequest.statusDate().isEmpty()){
-            throw new AccompanyException(AccompanyErrorCode.REQUIRED_DATE_MISSING);
-        }
-        if(accompanyRequest.statusDescribe().isEmpty()){
-            throw new AccompanyException(AccompanyErrorCode.REQUIRED_DESCRIPTION_MISSING);
+        if (accompanyRequest.statusDescribe().isEmpty()) {
+            throw new CustomException(REQUIRED_DESCRIPTION_MISSING);
         }
     }
 
