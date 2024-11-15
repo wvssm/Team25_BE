@@ -1,9 +1,6 @@
 package com.team25.backend.domain.payment.service;
 
-import com.team25.backend.domain.payment.dto.request.BillingKeyRequest;
-import com.team25.backend.domain.payment.dto.request.ExpireBillingKeyRequest;
-import com.team25.backend.domain.payment.dto.request.PaymentCancelRequest;
-import com.team25.backend.domain.payment.dto.request.PaymentRequest;
+import com.team25.backend.domain.payment.dto.request.*;
 import com.team25.backend.domain.payment.entity.BillingKey;
 import com.team25.backend.domain.payment.entity.Payment;
 import com.team25.backend.domain.payment.repository.BillingKeyRepository;
@@ -14,49 +11,73 @@ import com.team25.backend.domain.user.repository.UserRepository;
 import com.team25.backend.global.exception.CustomException;
 import com.team25.backend.global.exception.ErrorCode;
 import com.team25.backend.global.util.EncryptionUtil;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.web.client.RestClient;
 
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.when;
 
+@ActiveProfiles("test")
+@DataJpaTest
 class PaymentServiceTest {
 
     private PaymentService paymentService;
-    private RestClient restClient;
+
+    @Autowired
     private BillingKeyRepository billingKeyRepository;
+
+    @Autowired
     private UserRepository userRepository;
+
+    @Autowired
     private PaymentRepository paymentRepository;
+
+    @Autowired
     private ReservationRepository reservationRepository;
+
+    @MockBean
+    private RestClient restClient;
+
+    @MockBean
     private EncryptionUtil encryptionUtil;
+
+    private User user;
+    private String userUuid;
 
     @BeforeEach
     void setUp() {
-        restClient = mock(RestClient.class);
-        billingKeyRepository = mock(BillingKeyRepository.class);
-        userRepository = mock(UserRepository.class);
-        paymentRepository = mock(PaymentRepository.class);
-        reservationRepository = mock(ReservationRepository.class);
-        encryptionUtil = mock(EncryptionUtil.class);
+        user = new User("testUsername", "test-uuid", "ROLE_USER");
+        userRepository.save(user);
+        userUuid = user.getUuid();
 
         paymentService = new PaymentService(restClient, billingKeyRepository, userRepository, paymentRepository, reservationRepository, encryptionUtil);
+    }
+
+    @AfterEach
+    void tearDown() {
+        paymentRepository.deleteAllInBatch();
+        billingKeyRepository.deleteAllInBatch();
+        reservationRepository.deleteAllInBatch();
+        userRepository.deleteAllInBatch();
     }
 
     @Test
     @DisplayName("이미 빌링키가 존재하는 경우 빌링키 발급 시 예외 발생")
     void createBillingKey_AlreadyExists() {
+        // Given
         BillingKeyRequest requestDto = new BillingKeyRequest("testEncData", null);
 
-        User user = new User();
-        String userUuid = user.getUuid();
+        BillingKey existingBillingKey = new BillingKey();
+        existingBillingKey.setUser(user);
+        billingKeyRepository.save(existingBillingKey);
 
-        when(userRepository.findByUuid(userUuid)).thenReturn(Optional.of(user));
-        when(billingKeyRepository.findByUserUuid(userUuid)).thenReturn(Optional.of(new BillingKey()));
-
+        // When & Then
         CustomException exception = assertThrows(CustomException.class, () -> {
             paymentService.createBillingKey(userUuid, requestDto);
         });
@@ -67,13 +88,13 @@ class PaymentServiceTest {
     @Test
     @DisplayName("사용자 정보가 없는 경우 빌링키 발급 시 예외 발생")
     void createBillingKey_UserNotFound() {
-        String userUuid = "test-user-uuid";
+        // Given
+        String invalidUserUuid = "invalid-uuid";
         BillingKeyRequest requestDto = new BillingKeyRequest("testEncData", null);
 
-        when(userRepository.findByUuid(userUuid)).thenReturn(Optional.empty());
-
+        // When & Then
         CustomException exception = assertThrows(CustomException.class, () -> {
-            paymentService.createBillingKey(userUuid, requestDto);
+            paymentService.createBillingKey(invalidUserUuid, requestDto);
         });
 
         assertEquals(ErrorCode.USER_NOT_FOUND, exception.getErrorCode());
@@ -82,11 +103,10 @@ class PaymentServiceTest {
     @Test
     @DisplayName("빌링키가 없는 경우 빌링키 삭제 시 예외 발생")
     void expireBillingKey_BillingKeyNotFound() {
-        String userUuid = "test-user-uuid";
+        // Given
         ExpireBillingKeyRequest requestDto = new ExpireBillingKeyRequest("testOrderId");
 
-        when(billingKeyRepository.findByUserUuid(userUuid)).thenReturn(Optional.empty());
-
+        // When & Then
         CustomException exception = assertThrows(CustomException.class, () -> {
             paymentService.expireBillingKey(userUuid, requestDto);
         });
@@ -97,24 +117,54 @@ class PaymentServiceTest {
     @Test
     @DisplayName("사용자 정보가 없는 경우 빌링키 존재 유무 확인 시 예외 발생")
     void billingKeyExists_UserNotFound() {
-        String userUuid = "test-user-uuid";
+        // Given
+        String invalidUserUuid = "invalid-uuid";
+        userRepository.deleteAll();
 
-        when(billingKeyRepository.findByUserUuid(userUuid)).thenReturn(Optional.empty());
+        // When & Then
+        CustomException exception = assertThrows(CustomException.class, () -> {
+            paymentService.billingKeyExists(invalidUserUuid);
+        });
 
+        assertEquals(ErrorCode.USER_NOT_FOUND, exception.getErrorCode());
+    }
+
+
+    @Test
+    @DisplayName("빌링키 존재 여부 확인 - 빌링키가 없는 경우")
+    void billingKeyExists_NoBillingKey() {
+        // When
         Map<String, Object> response = paymentService.billingKeyExists(userUuid);
 
+        // Then
         assertFalse((Boolean) response.get("exists"));
         assertEquals("", response.get("cardName"));
     }
 
     @Test
+    @DisplayName("빌링키 존재 여부 확인 - 빌링키가 있는 경우")
+    void billingKeyExists_BillingKeyExists() {
+        // Given
+        BillingKey billingKey = new BillingKey();
+        billingKey.setUser(user);
+        billingKey.setCardName("Test Card");
+        billingKeyRepository.save(billingKey);
+
+        // When
+        Map<String, Object> response = paymentService.billingKeyExists(userUuid);
+
+        // Then
+        assertTrue((Boolean) response.get("exists"));
+        assertEquals("Test Card", response.get("cardName"));
+    }
+
+    @Test
     @DisplayName("빌링키가 없는 경우 결제 요청 시 예외 발생")
     void requestPayment_BillingKeyNotFound() {
-        String userUuid = "test-user-uuid";
+        // Given
         PaymentRequest requestDto = new PaymentRequest(1000, "Test Goods", null, false, null);
 
-        when(billingKeyRepository.findByUserUuid(userUuid)).thenReturn(Optional.empty());
-
+        // When & Then
         CustomException exception = assertThrows(CustomException.class, () -> {
             paymentService.requestPayment(userUuid, requestDto);
         });
@@ -128,9 +178,7 @@ class PaymentServiceTest {
         String userUuid = "test-user-uuid";
         PaymentRequest requestDto = new PaymentRequest(1000, "Test Goods", null, false, null);
 
-        when(billingKeyRepository.findByUserUuid(userUuid)).thenReturn(Optional.of(new BillingKey()));
-        when(userRepository.findByUuid(userUuid)).thenReturn(Optional.empty());
-
+        // When & Then
         CustomException exception = assertThrows(CustomException.class, () -> {
             paymentService.requestPayment(userUuid, requestDto);
         });
@@ -140,15 +188,17 @@ class PaymentServiceTest {
 
     @Test
     @DisplayName("예약 정보가 유효하지 않은 경우 결제 요청 시 예외 발생")
-    void requestPayment_InvalidReservation() throws Exception {
-        String userUuid = "test-user-uuid";
+    void requestPayment_InvalidReservation() {
+        // Given
+        BillingKey billingKey = new BillingKey();
+        billingKey.setUser(user);
+        billingKey.setBid("encrypted-bid");
+        billingKeyRepository.save(billingKey);
+
         Long reservationId = 1L;
         PaymentRequest requestDto = new PaymentRequest(1000, "Test Goods", null, false, reservationId);
 
-        when(billingKeyRepository.findByUserUuid(userUuid)).thenReturn(Optional.of(new BillingKey()));
-        when(userRepository.findByUuid(userUuid)).thenReturn(Optional.of(new User()));
-        when(reservationRepository.findById(reservationId)).thenReturn(Optional.empty());
-
+        // When & Then
         CustomException exception = assertThrows(CustomException.class, () -> {
             paymentService.requestPayment(userUuid, requestDto);
         });
@@ -158,12 +208,11 @@ class PaymentServiceTest {
 
     @Test
     @DisplayName("결제 정보가 없는 경우 결제 취소 시 예외 발생")
-    void requestCancel_PaymentNotFound() throws Exception {
-        String userUuid = "test-user-uuid";
+    void requestCancel_PaymentNotFound() {
+        // Given
         PaymentCancelRequest requestDto = new PaymentCancelRequest("testOrderId", "Test Reason");
 
-        when(paymentRepository.findByOrderId(requestDto.orderId())).thenReturn(Optional.empty());
-
+        // When & Then
         CustomException exception = assertThrows(CustomException.class, () -> {
             paymentService.requestCancel(userUuid, requestDto);
         });
@@ -173,17 +222,19 @@ class PaymentServiceTest {
 
     @Test
     @DisplayName("결제 정보와 사용자 정보가 일치하지 않는 경우 결제 취소 시 예외 발생")
-    void requestCancel_UserMismatch() throws Exception {
-        String userUuid = "test-user-uuid";
+    void requestCancel_UserMismatch() {
+        // Given
         PaymentCancelRequest requestDto = new PaymentCancelRequest("testOrderId", "Test Reason");
 
-        User paymentUser = new User();
+        User otherUser = new User("otherUser", "other-uuid", "ROLE_USER");
+        userRepository.save(otherUser);
 
         Payment payment = new Payment();
-        payment.setUser(paymentUser);
+        payment.setUser(otherUser);
+        payment.setOrderId(requestDto.orderId());
+        paymentRepository.save(payment);
 
-        when(paymentRepository.findByOrderId(requestDto.orderId())).thenReturn(Optional.of(payment));
-
+        // When & Then
         CustomException exception = assertThrows(CustomException.class, () -> {
             paymentService.requestCancel(userUuid, requestDto);
         });
@@ -194,10 +245,10 @@ class PaymentServiceTest {
     @Test
     @DisplayName("결제 정보가 없는 경우 단일 결제정보 조회 시 예외 발생")
     void getPaymentByOrderId_PaymentNotFound() {
+        // Given
         String orderId = "testOrderId";
 
-        when(paymentRepository.findByOrderId(orderId)).thenReturn(Optional.empty());
-
+        // When & Then
         CustomException exception = assertThrows(CustomException.class, () -> {
             paymentService.getPaymentByOrderId(orderId);
         });
@@ -206,28 +257,67 @@ class PaymentServiceTest {
     }
 
     @Test
+    @DisplayName("결제 정보가 있는 경우 단일 결제정보 조회")
+    void getPaymentByOrderId_Success() {
+        // Given
+        Payment payment = new Payment();
+        payment.setUser(user);
+        payment.setOrderId("testOrderId");
+        paymentRepository.save(payment);
+
+        // When
+        var response = paymentService.getPaymentByOrderId("testOrderId");
+
+        // Then
+        assertNotNull(response);
+        assertEquals("testOrderId", response.orderId());
+    }
+
+    @Test
     @DisplayName("사용자 정보가 없는 경우 결제정보 목록 조회 시 예외 발생")
     void getPaymentsByUserUuid_UserNotFound() {
-        String userUuid = "test-user-uuid";
+        // Given
+        String invalidUserUuid = "invalid-uuid";
 
-        when(userRepository.findByUuid(userUuid)).thenReturn(Optional.empty());
-
+        // When & Then
         CustomException exception = assertThrows(CustomException.class, () -> {
-            paymentService.getPaymentsByUserUuid(userUuid);
+            paymentService.getPaymentsByUserUuid(invalidUserUuid);
         });
 
         assertEquals(ErrorCode.USER_NOT_FOUND, exception.getErrorCode());
     }
 
     @Test
-    @DisplayName("예약 정보가 없는 경우 예약별 결제정보 목록 조회 시 예외 발생")
+    @DisplayName("사용자의 결제정보 목록 조회")
+    void getPaymentsByUserUuid_Success() {
+        // Given
+        Payment payment1 = new Payment();
+        payment1.setUser(user);
+        payment1.setOrderId("order1");
+        paymentRepository.save(payment1);
+
+        Payment payment2 = new Payment();
+        payment2.setUser(user);
+        payment2.setOrderId("order2");
+        paymentRepository.save(payment2);
+
+        // When
+        var payments = paymentService.getPaymentsByUserUuid(userUuid);
+
+        // Then
+        assertEquals(2, payments.size());
+    }
+
+    @Test
+    @DisplayName("예약 정보가 없는 경우 예약별 결제정보 목록 조회 시 빈 리스트 반환")
     void getPaymentsByReservationId_ReservationNotFound() {
+        // Given
         Long reservationId = 1L;
 
-        when(paymentRepository.findByReservationId(reservationId)).thenReturn(Collections.emptyList());
+        // When
+        var payments = paymentService.getPaymentsByReservationId(reservationId);
 
-        List<?> payments = paymentService.getPaymentsByReservationId(reservationId);
-
+        // Then
         assertTrue(payments.isEmpty());
     }
 }
