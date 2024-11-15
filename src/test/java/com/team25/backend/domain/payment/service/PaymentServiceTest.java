@@ -21,7 +21,6 @@ import org.springframework.web.client.RestClient;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.when;
 
 @ActiveProfiles("test")
 @DataJpaTest
@@ -52,8 +51,7 @@ class PaymentServiceTest {
 
     @BeforeEach
     void setUp() {
-        user = new User("testUsername", "test-uuid", "ROLE_USER");
-        userRepository.save(user);
+        user = userRepository.save(new User("testUsername", "test-uuid", "ROLE_USER"));
         userUuid = user.getUuid();
 
         paymentService = new PaymentService(restClient, billingKeyRepository, userRepository, paymentRepository, reservationRepository, encryptionUtil);
