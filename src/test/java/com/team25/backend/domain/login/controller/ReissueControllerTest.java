@@ -64,7 +64,7 @@ class ReissueControllerTest {
                 .andExpect(jsonPath("$.data.refreshToken").value("new_refresh_token"))
                 .andExpect(jsonPath("$.data.refreshTokenExpiresIn").value(7200L));
 
-        // validate method calls
+        // 메서드 호출 검증
         verify(reissueService, times(1)).validateRefreshToken(refreshToken);
         verify(reissueService, times(1)).getNewRefreshToken(refreshToken);
     }
