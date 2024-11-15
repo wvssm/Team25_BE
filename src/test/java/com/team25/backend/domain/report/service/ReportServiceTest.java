@@ -9,10 +9,8 @@ import static com.team25.backend.global.exception.ErrorCode.RESERVATION_WITHOUT_
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import com.team25.backend.domain.manager.entity.Certificate;
 import com.team25.backend.domain.manager.entity.Manager;
 import com.team25.backend.domain.manager.repository.ManagerRepository;
-import com.team25.backend.domain.manager.service.ManagerService;
 import com.team25.backend.domain.patient.dto.request.PatientRequest;
 import com.team25.backend.domain.patient.entity.Patient;
 import com.team25.backend.domain.patient.enumdomain.PatientGender;
@@ -68,25 +66,22 @@ class ReportServiceTest {
     private ReportService reportService;
     @Autowired
     private ReservationService reservationService;
-    @Autowired
-    private ManagerService managerService;
 
     private User user;
     private Manager manager;
-    private Patient patient;
-    private final String UserUUID = "uuid";
     private Reservation reservation;
-    private User userWhoisManager;
 
     @BeforeEach
     void setUp() {
-        user = userRepository.save(new User("userName", UserUUID, "ROLE_USER"));
-        userWhoisManager = userRepository.save(new User("whoisManager", UserUUID, "ROLE_MANAGER"));
+        String userUUID = "uuid";
+        user = userRepository.save(new User("userName", userUUID, "ROLE_USER"));
+        User userWhoisManager = userRepository.save(
+            new User("whoisManager", userUUID, "ROLE_MANAGER"));
         Manager savedManager = managerRepository.save(
             new Manager(null, userWhoisManager, "managerName", "profile", "Career", "comment",
-                "region", "gender", true, new ArrayList<Certificate>(), null));
+                "region", "gender", true, new ArrayList<>(), null));
         userWhoisManager.setManager(savedManager);
-        patient = patientRepository.save(new Patient(1L, "patient_name", "010-0000-0000",
+        Patient patient = patientRepository.save(new Patient(1L, "patient_name", "010-0000-0000",
             PatientGender.MALE, LocalDate.now(), "000-0000-0000", "relation", null));
         reservation = reservationRepository.save(
             new Reservation(null, manager, user, "department", "arrival",
@@ -119,10 +114,11 @@ class ReportServiceTest {
         ReportRequest reportRequest = new ReportRequest("doctorsummary", 3, MedicineTime.AFTER_MEAL,
             "timeOFDays");
         Reservation reservation2 = reservationRepository.findById(reservation1.reservationId())
-            .get();
+            .orElseThrow();
 
         // when
-        ReportResponse createdReport = reportService.createReport(reservation2.getId(), reportRequest);
+        ReportResponse createdReport = reportService.createReport(reservation2.getId(),
+            reportRequest);
 
         // then
         assertThat(createdReport).isNotNull();
@@ -140,7 +136,7 @@ class ReportServiceTest {
 
     @Test
     @DisplayName("리포트 의사 소견 누락 생성 테스트")
-    public void createReportWithNull() throws Exception {
+    public void createReportWithNull() {
         PatientRequest patientRequest = new PatientRequest("name", "010-0000-0000",
             PatientGender.MALE, "relation", "1000-02-15", "010-0000-0000");
         ReservationResponse reservation1 = reservationService.createReservation(
@@ -151,7 +147,7 @@ class ReportServiceTest {
         ReportRequest reportRequest = new ReportRequest("", 3, MedicineTime.AFTER_MEAL,
             "timeOFDays");
         Reservation reservation2 = reservationRepository.findById(reservation1.reservationId())
-            .get();
+            .orElseThrow();
 
         // when
         assertThatThrownBy(() -> reportService.createReport(reservation2.getId(), reportRequest))
@@ -173,7 +169,7 @@ class ReportServiceTest {
         // given
         Report report = new Report(null, reservation, "doctorsummary", 3, MedicineTime.AFTER_MEAL,
             "timeOfDay");
-        Report savedReport = reportRepository.save(report);
+        reportRepository.save(report);
 
         // when
         List<ReportResponse> reportList = reportService.getReport(reservation.getId());
@@ -197,7 +193,7 @@ class ReportServiceTest {
 
     @Test
     @DisplayName("리포트가 없는 예약의 경우 리포트 없음 예외 테스트")
-    public void retrieveReportyByUnreportedReservation() throws Exception{
+    public void retrieveReportyByUnreportedReservation() {
         // given & when & then
         assertThatThrownBy(() -> reportService.getReport(reservation.getId()))
             .isInstanceOf(CustomException.class)
@@ -210,7 +206,7 @@ class ReportServiceTest {
 
     @Test
     @DisplayName("미생성 예약에 대한 리포트 생성 시도")
-    public void createReportWithEmptyReservation() throws Exception {
+    public void createReportWithEmptyReservation() {
         // given
         Long nonExistReservationId = 987654321L;
         ReportRequest reportRequest = new ReportRequest(
@@ -234,7 +230,7 @@ class ReportServiceTest {
 
     @Test
     @DisplayName("MEDICINTIME 검증 테스트")
-    public void createReportWithoutMedicineTime() throws Exception {
+    public void createReportWithoutMedicineTime() {
         // given
         ReportRequest reportRequest = new ReportRequest(
             "summary",
@@ -256,7 +252,7 @@ class ReportServiceTest {
 
     @Test
     @DisplayName("TIMDOFDAY 누락 검증 테스트")
-    public void createReportWithoutTimeOfDay() throws Exception {
+    public void createReportWithoutTimeOfDay() {
         // given
         ReportRequest reportRequest = new ReportRequest("summary", 3, MedicineTime.AFTER_MEAL,
             null);
@@ -276,7 +272,7 @@ class ReportServiceTest {
 
     @Test
     @DisplayName("FREQUENCY INVALID 테스트")
-    public void invalidFrequencyTest() throws Exception{
+    public void invalidFrequencyTest() {
         // given
         int frequency = -216;
 
@@ -284,7 +280,7 @@ class ReportServiceTest {
         assertThatThrownBy(() -> ReportService.validateReportRequest(
             new ReportRequest("summary", frequency, MedicineTime.IN_MEAL, "아침")))
             .isInstanceOf(CustomException.class)
-            .satisfies(exception->{
+            .satisfies(exception -> {
                 CustomException ex = (CustomException) exception;
                 assertThat(ex.getErrorCode()).isEqualTo(INVALID_FREQUENCY);
                 assertThat(ex.getMessage()).isEqualTo(INVALID_FREQUENCY.getMessage());
