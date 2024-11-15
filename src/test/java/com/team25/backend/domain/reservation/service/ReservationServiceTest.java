@@ -26,7 +26,6 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.team25.backend.domain.manager.dto.request.ManagerCreateRequest;
-import com.team25.backend.domain.manager.dto.response.ManagerCreateResponse;
 import com.team25.backend.domain.manager.entity.Manager;
 import com.team25.backend.domain.manager.repository.CertificateRepository;
 import com.team25.backend.domain.manager.repository.ManagerRepository;
@@ -48,7 +47,6 @@ import com.team25.backend.domain.reservation.enumdomain.Transportation;
 import com.team25.backend.domain.reservation.repository.ReservationRepository;
 import com.team25.backend.domain.user.entity.User;
 import com.team25.backend.domain.user.repository.UserRepository;
-import com.team25.backend.domain.user.service.UserService;
 import com.team25.backend.global.exception.CustomException;
 import jakarta.transaction.Transactional;
 import java.time.LocalDate;
@@ -83,48 +81,42 @@ class ReservationServiceTest {
     ReservationRepository reservationRepository;
     @Autowired
     ReservationService reservationService;
-
-    private User user;
-    private Reservation reservation;
-    private Reservation newReservation;
-    private final String UserUUID = "uuid";
-    private PatientRequest patientRequest;
-    private ReservationRequest reservationRequest;
-    private ReservationRequest newReservationRequest;
-    private User newUser;
-    private ObjectMapper objectMapper;
     @Autowired
     private ManagerService managerService;
     @Autowired
     private CertificateRepository certificateRepository;
     @Autowired
     private WorkingHourRepository workingHourRepository;
-    @Autowired
-    private UserService userService;
+
+    private User user;
+    private Reservation reservation;
+    private final String UserUUID = "uuid";
+    private PatientRequest patientRequest;
+    private ReservationRequest reservationRequest;
+    private ReservationRequest newReservationRequest;
+    private User newUser;
+    private ObjectMapper objectMapper;
+    private  Manager firstManager;
 
 
     @BeforeEach
     void setUp() {
-        reservationRepository.deleteAll();
-        certificateRepository.deleteAll();
-        workingHourRepository.deleteAll();
-        managerRepository.deleteAll();
-        patientRepository.deleteAll();
         userRepository.deleteAll();
         user = userRepository.save(new User("userName", UserUUID, "ROLE_USER"));
         newUser = userRepository.save(
             new User("userName2_MANAGER", UserUUID + "ABCDEFGH", "ROLE_MANAGER"));
         managerService.createManager(newUser,
             new ManagerCreateRequest("managerName", "a", "A", "a", "a", "a"));
-        Long firstManager = managerRepository.findAll().getFirst().getId();
+        firstManager = managerRepository.findAll().getFirst();
         Patient patient = patientRepository.save(new Patient(1L, "patientName", "010-0000-0000",
             PatientGender.MALE, LocalDate.now(), "000-0000-0000", "relation", null));
-        reservation = new Reservation(null, null, user, "department", "arrival",
+        reservation = new Reservation(null, firstManager, user, "department", "arrival",
             LocalDateTime.now(), LocalDateTime.now(), false, ReservationStatus.HOLD, null, null,
             LocalDateTime.now(),
             ServiceType.CLINIC_ESCORT, Transportation.PUBLIC_TRANSPORTATION, 10000, false, null,
             null, patient);
-        newReservation = new Reservation(null, null, user, "department", "arrival",
+        Reservation newReservation = new Reservation(null, firstManager, user, "department",
+            "arrival",
             LocalDateTime.now(), LocalDateTime.now(), false, ReservationStatus.HOLD, null, null,
             LocalDateTime.now(),
             ServiceType.CLINIC_ESCORT, Transportation.PUBLIC_TRANSPORTATION, 20000, false, null,
@@ -132,7 +124,7 @@ class ReservationServiceTest {
         patientRequest = new PatientRequest(
             "patientName", "010-0000-0000", PatientGender.MALE, "relation", "1999-01-01",
             "010-0000-0000");
-        reservationRequest = new ReservationRequest(firstManager, "departure", "arrival",
+        reservationRequest = new ReservationRequest(firstManager.getId(), "departure", "arrival",
             "2024-05-01 15:25",
             ServiceType.CLINIC_ESCORT,
             Transportation.PUBLIC_TRANSPORTATION, 10000, patientRequest);
@@ -151,16 +143,7 @@ class ReservationServiceTest {
     @Test
     @DisplayName("예약 생성 테스트")
     void createReservation() {
-        // given
-        patientRequest = new PatientRequest(
-            "patientName", "010-0000-0000", PatientGender.MALE, "relation", "1999-01-01",
-            "010-0000-0000");
-        reservationRequest = new ReservationRequest(newUser.getManager().getId(), "department",
-            "arrival",
-            "2024-05-01 15:25",
-            ServiceType.CLINIC_ESCORT, Transportation.PUBLIC_TRANSPORTATION, 20000, patientRequest);
-
-        // when
+        // given & when
         ReservationResponse createdReservation = reservationService.createReservation(
             reservationRequest,
             user);
@@ -172,14 +155,14 @@ class ReservationServiceTest {
         assertThat(createdReservation).isNotNull();
         assertThat(createdReservation).satisfies(
             reservationResponse -> {
-                assertThat(reservationResponse.departureLocation()).isEqualTo("department");
+                assertThat(reservationResponse.departureLocation()).isEqualTo("departure");
                 assertThat(reservationResponse.arrivalLocation()).isEqualTo("arrival");
                 assertThat(reservationResponse.serviceType()).isEqualTo(ServiceType.CLINIC_ESCORT);
                 assertThat(reservationResponse.transportation()).isEqualTo(
                     Transportation.PUBLIC_TRANSPORTATION);
                 assertThat(reservationResponse.reservationStatus()).isEqualTo(
                     ReservationStatus.HOLD);
-                assertThat(reservationResponse.price()).isEqualTo(20000);
+                assertThat(reservationResponse.price()).isEqualTo(10000);
             }
         );
 
@@ -204,14 +187,11 @@ class ReservationServiceTest {
     @DisplayName("전체 예약 조회 테스트")
     void getAllReservations() {
         // given
-        patientRequest = new PatientRequest(
-            "patientName", "010-0000-0000", PatientGender.MALE, "relation", "1999-01-01",
-            "010-0000-0000");
-        Long managerId = managerRepository.findAll().getFirst().getId();
-        reservationRequest = new ReservationRequest(managerId, "department", "arrival",
+        // Long managerId = managerRepository.findAll().getFirst().getId();
+        reservationRequest = new ReservationRequest(firstManager.getId(), "department", "arrival",
             "2024-05-01 15:25",
             ServiceType.CLINIC_ESCORT, Transportation.PUBLIC_TRANSPORTATION, 10000, patientRequest);
-        newReservationRequest = new ReservationRequest(managerId, "department", "arrival",
+        newReservationRequest = new ReservationRequest(firstManager.getId(), "department", "arrival",
             "2024-05-01 15:25",
             ServiceType.CLINIC_ESCORT, Transportation.PUBLIC_TRANSPORTATION, 20000, patientRequest);
 
@@ -256,10 +236,8 @@ class ReservationServiceTest {
         // when & then
         assertThatThrownBy(() -> reservationService.getAllReservations(user)).isInstanceOf(
             CustomException.class);
-
         assertThatThrownBy(() -> reservationService.getAllReservations(user)).hasMessage(
             "예약이 존재하지 않습니다.");
-
         assertThatThrownBy(() -> reservationService.getAllReservations(user)).hasNoCause();
     }
 
@@ -267,14 +245,10 @@ class ReservationServiceTest {
     @DisplayName("예약 ID로 단일 예약 조회")
     void getReservationById() {
         // given
-        patientRequest = new PatientRequest(
-            "patientName", "010-0000-0000", PatientGender.MALE, "relation", "1999-01-01",
-            "010-0000-0000");
-        Long managerId = managerRepository.findAll().getFirst().getId();
-        reservationRequest = new ReservationRequest(managerId, "department", "arrival",
+        reservationRequest = new ReservationRequest(firstManager.getId(), "department", "arrival",
             "2024-05-01 15:25",
             ServiceType.CLINIC_ESCORT, Transportation.PUBLIC_TRANSPORTATION, 10000, patientRequest);
-        newReservationRequest = new ReservationRequest(managerId, "department", "arrival",
+        newReservationRequest = new ReservationRequest(firstManager.getId(), "department", "arrival",
             "2024-05-01 15:25",
             ServiceType.CLINIC_ESCORT, Transportation.PUBLIC_TRANSPORTATION, 20000, patientRequest);
 
@@ -307,7 +281,7 @@ class ReservationServiceTest {
                     "010-0000-0000".replace("-", ""));
                 assertThat(reservationResponse.patient().birthDate()).isEqualTo("1999-01-01");
                 assertThat(reservationResponse.price()).isEqualTo(10000);
-                assertThat(reservationResponse.managerId()).isEqualTo(managerId);
+                assertThat(reservationResponse.managerId()).isEqualTo(firstManager.getId());
                 assertThat(reservationResponse.reservationDateTime()).isEqualTo("2024-05-01T15:25");
             }
         );
@@ -315,9 +289,9 @@ class ReservationServiceTest {
 
     @Test
     @DisplayName("잘못된 유저 UUID로 인한 단일 예약 조회 실패 테스트")
-    public void getREservationByID_WithWrongUserUUIDTest() throws Exception {
+    public void getREservationByID_WithWrongUserUUIDTest() {
         // given
-        String wrongUserUUID = user.getUuid() + UUID.randomUUID().toString();
+        String wrongUserUUID = user.getUuid() + UUID.randomUUID();
         User savedUser = userRepository.save(
             new User(162L, "wrongUUIDUser", wrongUserUUID, "USER_ROLE", null, new ArrayList<>()));
         reservationRepository.save(reservation);
@@ -337,7 +311,7 @@ class ReservationServiceTest {
 
     @Test
     @DisplayName("다른 사용자의 예약 ID로 인한 단일 예약 조회 실패 테스트")
-    public void getReservationById_WithAnotherUsersReservationIdTest() throws Exception {
+    public void getReservationById_WithAnotherUsersReservationIdTest() {
         // given
         reservationRequest = new ReservationRequest(newUser.getManager().getId(),
             "departure",
@@ -777,7 +751,7 @@ class ReservationServiceTest {
 
     @Test
     @DisplayName("잘못된 유저 정보로 인한 예약 취소 실패 테스트")
-    public void cancelReservationWithWrongUserInfoTest() throws Exception {
+    public void cancelReservationWithWrongUserInfoTest() {
         // given
         String wrongUserUUID = UUID.randomUUID().toString();
         User forWrongUUIDUser = new User("name", wrongUserUUID, "ROLE_USER");
@@ -797,7 +771,7 @@ class ReservationServiceTest {
 
     @Test
     @DisplayName("이미 취소된 예약 취소 실패 테스트")
-    public void cancelReservationAlreadyCanceledTest() throws Exception {
+    public void cancelReservationAlreadyCanceledTest() {
         // given
         Manager testManager = managerRepository.findAll().getFirst();
         reservation.setManager(testManager);
@@ -824,7 +798,7 @@ class ReservationServiceTest {
     void changeReservationStatus() {
         // given
         // 매니저 생성 요청 객체
-        ManagerCreateRequest managerRequest = new ManagerCreateRequest(
+        new ManagerCreateRequest(
             "매니저이름",
             "프로필이미지URL",
             "경력 5년",
@@ -890,7 +864,7 @@ class ReservationServiceTest {
 
     @Test
     @DisplayName("예약 상태 변경 유효하지 않은 예약 상태로 인한 실패 테스트")
-    public void changeReservationStatus_WithInvalidReservationStatus_Test() throws Exception {
+    public void changeReservationStatus_WithInvalidReservationStatus_Test() {
         // given
         // 예약 요청 생성
         ReservationRequest reservationRequest = new ReservationRequest(
@@ -938,15 +912,13 @@ class ReservationServiceTest {
 
     @Test
     @DisplayName("해당 매니저 앞으로 어떠한 예약도 없는 경우 예약 상태 변경 실패 테스트")
-    public void changeReservationStatus_WithEmptyReservation_Test() throws Exception {
+    public void changeReservationStatus_WithEmptyReservation_Test() {
         // given
         // 매니저 생성 요청 객체
         User newUserWhoWillBeManager = userRepository.save(
-            new User("userName3_MANAGER", UserUUID + UUID.randomUUID().toString(), "ROLE_MANAGER"));
+            new User("userName3_MANAGER", UserUUID + UUID.randomUUID(), "ROLE_MANAGER"));
         managerService.createManager(newUserWhoWillBeManager,
             new ManagerCreateRequest("managerName3", "a3", "A3", "a3", "a3", "a3"));
-
-        Random random = new Random();
 
         // 예약 요청 생성
         ReservationRequest reservationRequest = new ReservationRequest(
@@ -994,7 +966,7 @@ class ReservationServiceTest {
 
     @Test
     @DisplayName("해당 매니저 앞으로  테스트")
-    public void changeReservationStatus_WithWrongReservationId_Test() throws Exception {
+    public void changeReservationStatus_WithWrongReservationId_Test() {
         // given
         // 매니저 생성 요청 객체
         Random random = new Random();
@@ -1031,7 +1003,7 @@ class ReservationServiceTest {
         assertThat(createdReservation).isNotNull();
 
         // when & then
-        User managerUser = userRepository.findById(newUser.getId()).orElseThrow();
+        userRepository.findById(newUser.getId()).orElseThrow();
         assertThatThrownBy(() -> reservationService.changeReservationStatus(
             newUser,
             reservation1.reservationId() + random.nextLong(),
@@ -1060,10 +1032,10 @@ class ReservationServiceTest {
         );
         User userWhoWillBeManager = new User("managerName", "MANAGERUUID", "ROLE_MANAGER");
         userRepository.save(userWhoWillBeManager);
-        ManagerCreateResponse savedManagerResponse = managerService.createManager(
+        managerService.createManager(
             userWhoWillBeManager, managerRequest);
         ReservationRequest reservationRequest = new ReservationRequest(
-            managerRepository.findByUserId(userWhoWillBeManager.getId()).get().getId(),
+            managerRepository.findByUserId(userWhoWillBeManager.getId()).orElseThrow().getId(),
             "department",
             "arrival",
             "2024-05-01 15:25",
@@ -1099,7 +1071,7 @@ class ReservationServiceTest {
 
     @Test
     @DisplayName("매니저가 아닌 유저가 매니저용 조회 시 실패 테스트")
-    public void findByReservationWrongUserStatusTest() throws Exception {
+    public void findByReservationWrongUserStatusTest() {
         // given & when & then
         assertThatThrownBy(() -> reservationService.getManagerReservation(user))
             .isInstanceOf(CustomException.class)
@@ -1112,7 +1084,7 @@ class ReservationServiceTest {
 
     @Test
     @DisplayName("매니저로 등록이 되어 있지 않은 사용자의 경우 매니저용 조회 시 실패 테스트")
-    public void findByReservation_WithNotRegisteredUserTest() throws Exception {
+    public void findByReservation_WithNotRegisteredUserTest() {
         // given
         User notRegisteredManager = new User(null, "notRegisteredManager",
             "UUIDMANAGERNOTRIGSTERED", "ROLE_MANAGER", null, new ArrayList<>());
@@ -1130,7 +1102,7 @@ class ReservationServiceTest {
 
     @Test
     @DisplayName("해당 매니저 리스트는 예약이 없는 경우 예약 조회 테스트")
-    public void findByReservation_WithNoReservationTest() throws Exception {
+    public void findByReservation_WithNoReservationTest() {
         // given & when & then
         assertThatThrownBy(() -> reservationService.getManagerReservation(newUser))
             .isInstanceOf(CustomException.class)
@@ -1145,7 +1117,7 @@ class ReservationServiceTest {
     @DisplayName("매니저가 예약 취소")
     void managerCancelReservationWithChangeReservationStatusTest() {
         // given
-        ManagerCreateRequest managerRequest = new ManagerCreateRequest(
+        new ManagerCreateRequest(
             "매니저이름",
             "프로필이미지URL",
             "경력 5년",

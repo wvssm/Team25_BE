@@ -66,8 +66,6 @@ class AccompanyControllerTest {
 
     private ObjectMapper objectMapper;
     private PatientResponse patient;
-    // @Autowired
-    // private ResponseEntityExceptionHandler responseEntityExceptionHandler;
 
     @BeforeEach
     void setup() throws Exception {

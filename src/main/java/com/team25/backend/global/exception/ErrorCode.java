@@ -1,8 +1,10 @@
 package com.team25.backend.global.exception;
 
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 import org.springframework.http.HttpStatus;
 
+@Getter
 @AllArgsConstructor
 public enum ErrorCode {
     // 예약 에러 코드
@@ -46,38 +48,38 @@ public enum ErrorCode {
     REQUIRED_DATE_MISSING(HttpStatus.BAD_REQUEST, "시간은 필수 입력 값입니다."),
     REQUIRED_DESCRIPTION_MISSING(HttpStatus.BAD_REQUEST, "리포트 상세 사항은 필수 사항입니다."),
 
-
-    KAKAO_PLATFORM_ERROR(HttpStatus.BAD_REQUEST, "KAKAO PLATFORM INTERNAL ERROR"),
-    KAKAO_TOKEN_FORMAT_ERROR(HttpStatus.BAD_REQUEST, "BAD REQUEST FORMAT"),
-    KAKAO_EXPIRED_TOKEN(HttpStatus.UNAUTHORIZED, "TOKEN IS EXPIRED OR INVALID"),
+    // 회원 관련 에러 코드
     USER_NOT_FOUND(HttpStatus.NOT_FOUND,"회원이 존재하지 않습니다."),
     USER_ALREADY_EXISTS(HttpStatus.CONFLICT,"회원이 이미 존재합니다."),
+
+    // 인증 인가 관련 에러코드
     RESPONSE_BODY_NULL(HttpStatus.INTERNAL_SERVER_ERROR,"API 요청 응답이 비어있습니다."),
-    MANAGER_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 매니저입니다."),
-    MANAGER_ALREADY_EXISTS(HttpStatus.CONFLICT,"매니저 정보가 이미 등록되어 있습니다."),
     TOKEN_EXPIRED(HttpStatus.BAD_REQUEST, "JWT 토큰이 만료되었습니다."),
     INVALID_FORMAT_TOKEN(HttpStatus.BAD_REQUEST, "잘못된 형식의 JWT 토큰입니다."),
     NOT_REFRESH_TOKEN(HttpStatus.BAD_REQUEST, "해당 JWT 토큰은 Refresh 토큰이 아닙니다."),
     NOT_EXISTED_REFRESH_TOKEN(HttpStatus.BAD_REQUEST,"해당 Refresh 토큰이 존재하지 않습니다."),
     FAIL_LOGIN(HttpStatus.UNAUTHORIZED, "로그인을 실패했습니다."),
 
-    // 결제 에러 코드
-    BILLING_KEY_NOT_FOUND(HttpStatus.NOT_FOUND, "빌링키를 찾을 수 없습니다."),
-    BILLING_KEY_EXISTS(HttpStatus.CONFLICT, "이미 빌링키가 존재합니다."),
-    PAYMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "결제를 찾을 수 없습니다."),
-    PAYMENT_USER_MISMATCH(HttpStatus.FORBIDDEN, "결제 사용자와 요청 사용자가 일치하지 않습니다."),
-    FAILED_TO_REQUEST_BILLING_KEY(HttpStatus.INTERNAL_SERVER_ERROR, "빌링키 요청에 실패했습니다."),
-    FAILED_TO_PROCESS_PAYMENT(HttpStatus.INTERNAL_SERVER_ERROR, "결제 처리에 실패했습니다."),
-    FAILED_TO_EXPIRE_BILLING_KEY(HttpStatus.INTERNAL_SERVER_ERROR, "빌링키 삭제에 실패했습니다."),
-    ;
+    // kakao oauth 관련 에러코드
+    KAKAO_PLATFORM_ERROR(HttpStatus.BAD_REQUEST, "KAKAO PLATFORM INTERNAL ERROR"),
+    KAKAO_TOKEN_FORMAT_ERROR(HttpStatus.BAD_REQUEST, "BAD REQUEST FORMAT"),
+    KAKAO_EXPIRED_TOKEN(HttpStatus.UNAUTHORIZED, "TOKEN IS EXPIRED OR INVALID"),
+
+    // 매니저 관련 에러 코드
+    MANAGER_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 매니저입니다."),
+    MANAGER_ALREADY_EXISTS(HttpStatus.CONFLICT,"매니저 정보가 이미 등록되어 있습니다."),
+    INVALID_INPUT_VALUE(HttpStatus.BAD_REQUEST, "잘못된 입력 값입니다."),
+    INVALID_DATE_FORMAT(HttpStatus.BAD_REQUEST, "날짜 형식이 옳지 않습니다."),
+    UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "등록되지 않은 회원입니다."),
+    REGION_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 지역입니다."),
+    NAME_TOO_SHORT(HttpStatus.BAD_REQUEST, "이름은 1자 이상 입력해야 합니다."),
+    INVALID_WORKING_HOUR_FORMAT(HttpStatus.BAD_REQUEST, "근무 시작 시간은 숫자로 작성해야 합니다."),
+    INVALID_PROFILE_IMAGE(HttpStatus.BAD_REQUEST, "프로필 사진 경로는 0자 이상이어야 합니다."),
+    INVALID_COMMENT(HttpStatus.BAD_REQUEST, "코멘트는 0자 이상이어야 합니다."),
+    INVALID_WORKING_REGION(HttpStatus.BAD_REQUEST, "근무 지역은 0자 이상이어야 합니다."),
+    WORKING_HOUR_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 근무시간입니다."),
+    INVALID_TIME_RANGE(HttpStatus.BAD_REQUEST, "근무 시작 시간은 종료 시간보다 앞서야 합니다.");
 
     private final HttpStatus status;
     private final String message;
-
-    public HttpStatus getStatus() {
-        return status;
-    }
-    public String getMessage() {
-        return message;
-    }
 }

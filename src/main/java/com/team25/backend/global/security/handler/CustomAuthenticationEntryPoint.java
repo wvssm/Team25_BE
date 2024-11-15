@@ -1,4 +1,4 @@
-package com.team25.backend.global.security.custom;
+package com.team25.backend.global.security.handler;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

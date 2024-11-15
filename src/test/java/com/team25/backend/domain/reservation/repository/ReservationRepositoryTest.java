@@ -72,8 +72,6 @@ class ReservationRepositoryTest {
         userRepository.deleteAllInBatch();
     }
 
-    // 성공 테스트
-
     @Test
     @DisplayName("예약 저장 테스트")
     void saveReservationTest() {
@@ -150,7 +148,6 @@ class ReservationRepositoryTest {
         assertThat(reservationRepository.findByUser_Uuid(UserUUID)).isEqualTo(reservations);
     }
 
-    // 실패 케이스 - Null 값 테스트
     @Test
     @DisplayName("Null UUID로 예약 조회시 실패 테스트")
     void findByUser_UuidTest_NullUuid() {
@@ -191,7 +188,6 @@ class ReservationRepositoryTest {
     }
 
 
-    // 실패 케이스 - 조회 실패
     @Test
     @DisplayName("존재하지 않는 예약 ID로 조회시 실패 테스트")
     void findByIdTest_NotFound() {
