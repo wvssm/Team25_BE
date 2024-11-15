@@ -29,54 +29,6 @@ public class GlobalExceptionHandler {
             HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler(ManagerException.class)
-    public ResponseEntity<ApiResponse<String>> handleManagerException(ManagerException ex) {
-        return new ResponseEntity<>(
-            ApiResponse.<String>builder()
-                .status(false)
-                .message(ex.getErrorCode().getMessage())
-                .data(null)
-                .build(),
-            ex.getErrorCode().getHttpStatus()
-        );
-    }
-
-    @ExceptionHandler(ReservationException.class)
-    public ResponseEntity<ApiResponse<String>> handleReservationException(ReservationException ex) {
-        return new ResponseEntity<>(
-            ApiResponse.<String>builder()
-                .status(false)
-                .message(ex.getErrorCode().getMessage())
-                .data(null)
-                .build(),
-            ex.getErrorCode().getHttpStatus()
-        );
-    }
-
-    @ExceptionHandler(ReportException.class)
-    public ResponseEntity<ApiResponse<String>> handleReportException(ReportException ex) {
-        return new ResponseEntity<>(
-            ApiResponse.<String>builder()
-                .status(false)
-                .message(ex.getErrorCode().getMessage())
-                .data(null)
-                .build(),
-            ex.getErrorCode().getHttpStatus()
-        );
-    }
-
-    @ExceptionHandler(AccompanyException.class)
-    public ResponseEntity<ApiResponse<String>> handleAccompanyException(AccompanyException ex) {
-        return new ResponseEntity<>(
-            ApiResponse.<String>builder()
-                .status(false)
-                .message(ex.getErrorCode().getMessage())
-                .data(null)
-                .build(),
-            ex.getErrorCode().getHttpStatus()
-        );
-    }
-
     @ExceptionHandler(CustomException.class)
     public ResponseEntity<ApiResponse<String>> handleCustomException(CustomException ex) {
         ApiResponse<String>apiResponse = new ApiResponse<>(false,ex.getErrorCode().getMessage(),null);

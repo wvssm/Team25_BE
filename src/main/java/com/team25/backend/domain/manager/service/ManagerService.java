@@ -18,8 +18,7 @@ import com.team25.backend.domain.manager.entity.Certificate;
 import com.team25.backend.domain.user.entity.User;
 import com.team25.backend.domain.manager.entity.WorkingHour;
 import com.team25.backend.global.exception.CustomException;
-import com.team25.backend.global.exception.ManagerException;
-import com.team25.backend.global.exception.ManagerErrorCode;
+import com.team25.backend.global.exception.ErrorCode;
 import com.team25.backend.domain.manager.repository.ManagerRepository;
 import com.team25.backend.domain.manager.repository.CertificateRepository;
 import com.team25.backend.domain.manager.repository.WorkingHourRepository;
@@ -92,7 +91,7 @@ public class ManagerService {
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
             LocalDate.parse(date, formatter);
         } catch (DateTimeParseException e) {
-            throw new ManagerException(ManagerErrorCode.INVALID_DATE_FORMAT);
+            throw new CustomException(ErrorCode.INVALID_DATE_FORMAT);
         }
     }
 
@@ -103,7 +102,7 @@ public class ManagerService {
 
     private void validateRegion(String regionPrefix) {
         if (!regionExists(regionPrefix)) {
-            throw new ManagerException(ManagerErrorCode.REGION_NOT_FOUND);
+            throw new CustomException(ErrorCode.REGION_NOT_FOUND);
         }
     }
 
@@ -118,7 +117,7 @@ public class ManagerService {
     @Transactional
     public ManagerCreateResponse createManager(User user, ManagerCreateRequest request) {
         if (user.getId() == null) {
-            throw new ManagerException(ManagerErrorCode.UNAUTHORIZED);
+            throw new CustomException(ErrorCode.UNAUTHORIZED);
         }
 
         if(managerRepository.existsByUserId(user.getId())){
@@ -156,25 +155,25 @@ public class ManagerService {
 
     private void validateCreateRequest(ManagerCreateRequest request) {
         if (request.name().isEmpty()) {
-            throw new ManagerException(ManagerErrorCode.INVALID_INPUT_VALUE);
+            throw new CustomException(ErrorCode.INVALID_INPUT_VALUE);
         }
     }
 
     public ManagerProfileResponse getManagerProfile(Long managerId) {
         Manager manager = managerRepository.findById(managerId)
-                .orElseThrow(() -> new ManagerException(ManagerErrorCode.MANAGER_NOT_FOUND));
+                .orElseThrow(() -> new CustomException(ErrorCode.MANAGER_NOT_FOUND));
 
         return ManagerProfileResponse.fromEntity(manager);
     }
 
     public ManagerProfileResponse getManagerProfile(User user) {
         if (user.getId() == null) {
-            throw new ManagerException(ManagerErrorCode.UNAUTHORIZED);
+            throw new CustomException(ErrorCode.UNAUTHORIZED);
         }
 
         Manager manager = user.getManager();
         if (manager == null) {
-            throw new ManagerException(ManagerErrorCode.MANAGER_NOT_FOUND);
+            throw new CustomException(ErrorCode.MANAGER_NOT_FOUND);
         }
 
         return ManagerProfileResponse.fromEntity(manager);
@@ -182,18 +181,18 @@ public class ManagerService {
 
     public ManagerWorkingHourUpdateResponse updateWorkingHour(User user, ManagerWorkingHourUpdateRequest request) {
         if (user.getId() == null) {
-            throw new ManagerException(ManagerErrorCode.UNAUTHORIZED);
+            throw new CustomException(ErrorCode.UNAUTHORIZED);
         }
 
         Manager manager = user.getManager();
 
         if (manager == null) {
-            throw new ManagerException(ManagerErrorCode.MANAGER_NOT_FOUND);
+            throw new CustomException(ErrorCode.MANAGER_NOT_FOUND);
         }
 
         WorkingHour workingHour = manager.getWorkingHour();
         if (workingHour == null) {
-            throw new ManagerException(ManagerErrorCode.WORKING_HOUR_NOT_FOUND);
+            throw new CustomException(ErrorCode.WORKING_HOUR_NOT_FOUND);
         }
 
         validateWorkingHourRequest(request);
@@ -230,17 +229,17 @@ public class ManagerService {
 
     private void validateWorkingHour(String startTime, String endTime) {
         if (!startTime.matches("\\d{2}:\\d{2}")) {
-            throw new ManagerException(ManagerErrorCode.INVALID_WORKING_HOUR_FORMAT);
+            throw new CustomException(ErrorCode.INVALID_WORKING_HOUR_FORMAT);
         }
         if (!endTime.matches("\\d{2}:\\d{2}")) {
-            throw new ManagerException(ManagerErrorCode.INVALID_WORKING_HOUR_FORMAT);
+            throw new CustomException(ErrorCode.INVALID_WORKING_HOUR_FORMAT);
         }
 
         LocalTime start = LocalTime.parse(startTime);
         LocalTime end = LocalTime.parse(endTime);
         if (!(start.equals(LocalTime.MIDNIGHT) && end.equals(LocalTime.MIDNIGHT))) {
             if (!start.isBefore(end)) {
-                throw new ManagerException(ManagerErrorCode.INVALID_TIME_RANGE);
+                throw new CustomException(ErrorCode.INVALID_TIME_RANGE);
             }
         }
     }
@@ -248,13 +247,13 @@ public class ManagerService {
 
     public ManagerProfileImageUpdateResponse updateProfileImage(User user, ManagerProfileImageUpdateRequest request) {
         if (user.getId() == null) {
-            throw new ManagerException(ManagerErrorCode.UNAUTHORIZED);
+            throw new CustomException(ErrorCode.UNAUTHORIZED);
         }
 
         Manager manager = user.getManager();
 
         if (manager == null) {
-            throw new ManagerException(ManagerErrorCode.MANAGER_NOT_FOUND);
+            throw new CustomException(ErrorCode.MANAGER_NOT_FOUND);
         }
 
         validateProfileImage(request.profileImage());
@@ -267,19 +266,19 @@ public class ManagerService {
 
     private void validateProfileImage(String profileImage) {
         if (profileImage == null || profileImage.isEmpty()) {
-            throw new ManagerException(ManagerErrorCode.INVALID_PROFILE_IMAGE);
+            throw new CustomException(ErrorCode.INVALID_PROFILE_IMAGE);
         }
     }
 
     public ManagerCommentUpdateResponse updateComment(User user, ManagerCommentUpdateRequest request) {
         if (user.getId() == null) {
-            throw new ManagerException(ManagerErrorCode.UNAUTHORIZED);
+            throw new CustomException(ErrorCode.UNAUTHORIZED);
         }
 
         Manager manager = user.getManager();
 
         if (manager == null) {
-            throw new ManagerException(ManagerErrorCode.MANAGER_NOT_FOUND);
+            throw new CustomException(ErrorCode.MANAGER_NOT_FOUND);
         }
 
         validateComment(request.comment());
@@ -292,19 +291,19 @@ public class ManagerService {
 
     private void validateComment(String comment) {
         if (comment == null || comment.isEmpty()) {
-            throw new ManagerException(ManagerErrorCode.INVALID_COMMENT);
+            throw new CustomException(ErrorCode.INVALID_COMMENT);
         }
     }
 
     public ManagerLocationUpdateResponse updateLocation(User user, ManagerLocationUpdateRequest request) {
         if (user.getId() == null) {
-            throw new ManagerException(ManagerErrorCode.UNAUTHORIZED);
+            throw new CustomException(ErrorCode.UNAUTHORIZED);
         }
 
         Manager manager = user.getManager();
 
         if (manager == null) {
-            throw new ManagerException(ManagerErrorCode.MANAGER_NOT_FOUND);
+            throw new CustomException(ErrorCode.MANAGER_NOT_FOUND);
         }
 
         validateWorkingRegion(request.workingRegion());
@@ -317,7 +316,7 @@ public class ManagerService {
 
     private void validateWorkingRegion(String workingRegion) {
         if (workingRegion == null || workingRegion.isEmpty()) {
-            throw new ManagerException(ManagerErrorCode.INVALID_WORKING_REGION);
+            throw new CustomException(ErrorCode.INVALID_WORKING_REGION);
         }
     }
 

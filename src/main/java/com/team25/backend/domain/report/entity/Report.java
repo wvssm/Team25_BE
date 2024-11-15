@@ -2,6 +2,7 @@ package com.team25.backend.domain.report.entity;
 
 import com.team25.backend.domain.reservation.entity.Reservation;
 import com.team25.backend.domain.report.enumdomain.MedicineTime;
+import jakarta.annotation.Nullable;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -34,19 +35,19 @@ public class Report {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "reservation_id")
+    @JoinColumn(name = "reservation_id",nullable = false)
     private Reservation reservation;
 
-    @Column(name = "doctor_summary")
+    @Column(name = "doctor_summary",nullable = false)
     private String doctorSummary;
 
-    @Column(name = "frequency")
+    @Column(name = "frequency",nullable = false)
     private int frequency;
 
-    @Column(name = "meal_time")
+    @Column(name = "meal_time",nullable = false)
     @Enumerated(EnumType.STRING)
     private MedicineTime medicineTime;
 
-    @Column(name = "time_of_day")
+    @Column(name = "time_of_day",nullable = false)
     private String timeOfDay;
 }
