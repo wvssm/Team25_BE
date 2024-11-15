@@ -1,4 +1,4 @@
-package com.team25.backend.global.security.custom;
+package com.team25.backend.global.security.custom.dto;
 
 import com.team25.backend.domain.user.entity.User;
 import org.springframework.security.core.GrantedAuthority;

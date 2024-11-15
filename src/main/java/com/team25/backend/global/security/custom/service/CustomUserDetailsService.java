@@ -1,6 +1,7 @@
-package com.team25.backend.global.security.custom;
+package com.team25.backend.global.security.custom.service;
 
 import com.team25.backend.domain.user.repository.UserRepository;
+import com.team25.backend.global.security.custom.dto.CustomUserDetails;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
