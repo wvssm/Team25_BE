@@ -127,7 +127,7 @@
 
 ### 📌 Request와 Response는 반드시 DTO로 사용
 
-> 모든 요청과 응답은 **DTO(Data Transfer Object)**로 처리하여 데이터 구조의 명확성을 확보하고, **Controller와 Service 간의 데이터 의존성을 줄였습니다**.
+> 모든 요청과 응답은 **DTO(Data Transfer Object)** 로 처리하여 데이터 구조의 명확성을 확보하고, **Controller와 Service 간의 데이터 의존성을 줄였습니다**.
 >
 > 이를 통해 코드 유지보수가 용이하고 각 레이어의 책임을 명확히 분리하였습니다.
 
