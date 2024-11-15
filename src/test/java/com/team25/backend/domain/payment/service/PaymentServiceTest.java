@@ -106,4 +106,88 @@ class PaymentServiceTest {
         assertFalse((Boolean) response.get("exists"));
         assertEquals("", response.get("cardName"));
     }
+
+    @Test
+    @DisplayName("빌링키가 없는 경우 결제 요청 시 예외 발생")
+    void requestPayment_BillingKeyNotFound() {
+        String userUuid = "test-user-uuid";
+        PaymentRequest requestDto = new PaymentRequest(1000, "Test Goods", null, false, null);
+
+        when(billingKeyRepository.findByUserUuid(userUuid)).thenReturn(Optional.empty());
+
+        PaymentException exception = assertThrows(PaymentException.class, () -> {
+            paymentService.requestPayment(userUuid, requestDto);
+        });
+
+        assertEquals(PaymentErrorCode.BILLING_KEY_NOT_FOUND, exception.getErrorCode());
+    }
+
+    @Test
+    @DisplayName("사용자 정보가 없는 경우 결제 요청 시 예외 발생")
+    void requestPayment_UserNotFound() throws Exception {
+        String userUuid = "test-user-uuid";
+        PaymentRequest requestDto = new PaymentRequest(1000, "Test Goods", null, false, null);
+
+        when(billingKeyRepository.findByUserUuid(userUuid)).thenReturn(Optional.of(new BillingKey()));
+        when(userRepository.findByUuid(userUuid)).thenReturn(Optional.empty());
+
+        PaymentException exception = assertThrows(PaymentException.class, () -> {
+            paymentService.requestPayment(userUuid, requestDto);
+        });
+
+        assertEquals(PaymentErrorCode.USER_NOT_FOUND, exception.getErrorCode());
+    }
+
+    @Test
+    @DisplayName("예약 정보가 유효하지 않은 경우 결제 요청 시 예외 발생")
+    void requestPayment_InvalidReservation() throws Exception {
+        String userUuid = "test-user-uuid";
+        Long reservationId = 1L;
+        PaymentRequest requestDto = new PaymentRequest(1000, "Test Goods", null, false, reservationId);
+
+        when(billingKeyRepository.findByUserUuid(userUuid)).thenReturn(Optional.of(new BillingKey()));
+        when(userRepository.findByUuid(userUuid)).thenReturn(Optional.of(new User()));
+        when(reservationRepository.findById(reservationId)).thenReturn(Optional.empty());
+
+        PaymentException exception = assertThrows(PaymentException.class, () -> {
+            paymentService.requestPayment(userUuid, requestDto);
+        });
+
+        assertEquals(PaymentErrorCode.RESERVATION_NOT_FOUND, exception.getErrorCode());
+    }
+
+    @Test
+    @DisplayName("결제 정보가 없는 경우 결제 취소 시 예외 발생")
+    void requestCancel_PaymentNotFound() throws Exception {
+        String userUuid = "test-user-uuid";
+        PaymentCancelRequest requestDto = new PaymentCancelRequest("testOrderId", "Test Reason");
+
+        when(paymentRepository.findByOrderId(requestDto.orderId())).thenReturn(Optional.empty());
+
+        PaymentException exception = assertThrows(PaymentException.class, () -> {
+            paymentService.requestCancel(userUuid, requestDto);
+        });
+
+        assertEquals(PaymentErrorCode.PAYMENT_NOT_FOUND, exception.getErrorCode());
+    }
+
+    @Test
+    @DisplayName("결제 정보와 사용자 정보가 일치하지 않는 경우 결제 취소 시 예외 발생")
+    void requestCancel_UserMismatch() throws Exception {
+        String userUuid = "test-user-uuid";
+        PaymentCancelRequest requestDto = new PaymentCancelRequest("testOrderId", "Test Reason");
+
+        User paymentUser = new User();
+
+        Payment payment = new Payment();
+        payment.setUser(paymentUser);
+
+        when(paymentRepository.findByOrderId(requestDto.orderId())).thenReturn(Optional.of(payment));
+
+        PaymentException exception = assertThrows(PaymentException.class, () -> {
+            paymentService.requestCancel(userUuid, requestDto);
+        });
+
+        assertEquals(PaymentErrorCode.PAYMENT_USER_MISMATCH, exception.getErrorCode());
+    }
 }
