@@ -78,8 +78,19 @@ public enum ErrorCode {
     INVALID_COMMENT(HttpStatus.BAD_REQUEST, "코멘트는 0자 이상이어야 합니다."),
     INVALID_WORKING_REGION(HttpStatus.BAD_REQUEST, "근무 지역은 0자 이상이어야 합니다."),
     WORKING_HOUR_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 근무시간입니다."),
-    INVALID_TIME_RANGE(HttpStatus.BAD_REQUEST, "근무 시작 시간은 종료 시간보다 앞서야 합니다.");
+    INVALID_TIME_RANGE(HttpStatus.BAD_REQUEST, "근무 시작 시간은 종료 시간보다 앞서야 합니다."),
+
+    // 결제 에러 코드
+    BILLING_KEY_NOT_FOUND(HttpStatus.NOT_FOUND, "빌링키를 찾을 수 없습니다."),
+    BILLING_KEY_EXISTS(HttpStatus.CONFLICT, "이미 빌링키가 존재합니다."),
+    PAYMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "결제를 찾을 수 없습니다."),
+    PAYMENT_USER_MISMATCH(HttpStatus.FORBIDDEN, "결제 사용자와 요청 사용자가 일치하지 않습니다."),
+    FAILED_TO_REQUEST_BILLING_KEY(HttpStatus.INTERNAL_SERVER_ERROR, "빌링키 요청에 실패했습니다."),
+    FAILED_TO_PROCESS_PAYMENT(HttpStatus.INTERNAL_SERVER_ERROR, "결제 처리에 실패했습니다."),
+    FAILED_TO_EXPIRE_BILLING_KEY(HttpStatus.INTERNAL_SERVER_ERROR, "빌링키 삭제에 실패했습니다.");
 
     private final HttpStatus status;
     private final String message;
+
+
 }
