@@ -53,28 +53,24 @@ class ReportRepositoryTest {
     ReportRepository reportRepository;
     @Autowired
     private TestEntityManager entityManager;
-
-    private User user;
-    private Manager manager;
-    private Patient patient;
-    private final String UserUUID = "uuid";
-    private Reservation reservation;
     @Autowired
     private CertificateRepository certificateRepository;
     @Autowired
     private WorkingHourRepository workingHourRepository;
+    private Reservation reservation;
 
     @BeforeEach
     void setUp() {
-        user = userRepository.save(new User("userName", UserUUID, "ROLE_USER"));
+        String userUUID = "uuid";
+        User user = userRepository.save(new User("userName", userUUID, "ROLE_USER"));
         entityManager.flush();
 
-        manager = managerRepository.save(
+        Manager manager = managerRepository.save(
             new Manager(1L, user, "managerName", "profileImage", "career", "comment",
                 "workingRegion", "gender", false, new ArrayList<>(), null));
         entityManager.flush();
 
-        patient = patientRepository.save(new Patient(1L, "patient_name", "010-0000-0000",
+        Patient patient = patientRepository.save(new Patient(1L, "patient_name", "010-0000-0000",
             PatientGender.MALE, LocalDate.now(), "000-0000-0000", "relation", null));
         entityManager.flush();
 
@@ -98,7 +94,7 @@ class ReportRepositoryTest {
             patientRepository.deleteAllInBatch();
             managerRepository.deleteAllInBatch();
             userRepository.deleteAllInBatch();
-        } catch (Exception e) {
+        } catch (Exception ignored) {
         }
     }
 
@@ -149,7 +145,7 @@ class ReportRepositoryTest {
 
     @Test
     @DisplayName("리포트 조회 테스트")
-    void findReportTest() throws Exception {
+    void findReportTest() {
         // given
         Report report = new Report(null, reservation, "doctorsummary", 3, MedicineTime.AFTER_MEAL,
             "아침점심저녁");
@@ -183,7 +179,7 @@ class ReportRepositoryTest {
 
         // when & then
         assertThatThrownBy(() ->
-            reportRepository.findById(savedReport.getId() + random.nextLong()).get())
+            reportRepository.findById(savedReport.getId() + random.nextLong()).orElseThrow())
             .isInstanceOf(NoSuchElementException.class);
     }
 
@@ -270,7 +266,7 @@ class ReportRepositoryTest {
 
     @Test
     @DisplayName("Report Builder 저장 테스트")
-    public void saveReportByBuilderTest() throws Exception{
+    public void saveReportByBuilderTest() {
         // given
         Report reportByBuilder = Report.builder()
             .reservation(reservation)
