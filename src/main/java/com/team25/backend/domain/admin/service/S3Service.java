@@ -20,8 +20,8 @@ public class S3Service {
     public S3Service(@Value("${s3.access-key}") String accessKey,
                      @Value("${s3.secret-access-key}") String secretAccessKey) {
         AwsBasicCredentials awsCreds = AwsBasicCredentials.create(
-                accessKey, // Access Key ID
-                secretAccessKey // Secret Access Key
+                accessKey,
+                secretAccessKey
         );
         this.presigner = S3Presigner.builder()
                 .region(Region.AP_NORTHEAST_2)
