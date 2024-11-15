@@ -42,12 +42,6 @@ public class Accompany {
     @Enumerated(value = EnumType.STRING)
     private AccompanyStatus accompanyStatus;
 
-    @Column(name = "latitude")
-    private Double latitude;
-
-    @Column(name = "longitude")
-    private Double longitude;
-
     @Column(name = "time")
     private LocalDateTime time;
 
