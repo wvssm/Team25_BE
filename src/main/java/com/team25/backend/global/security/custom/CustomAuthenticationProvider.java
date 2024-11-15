@@ -1,5 +1,6 @@
 package com.team25.backend.global.security.custom;
 
+import com.team25.backend.global.security.custom.service.CustomUserDetailsService;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;

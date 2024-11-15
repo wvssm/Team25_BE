@@ -1,7 +1,9 @@
-package com.team25.backend.global.security.custom;
+package com.team25.backend.global.security.custom.filter;
 
 import com.team25.backend.domain.user.entity.User;
 import com.team25.backend.domain.user.repository.UserRepository;
+import com.team25.backend.global.security.custom.dto.CustomUserDetails;
+import com.team25.backend.global.security.custom.filter.JWTFilter;
 import com.team25.backend.global.util.JWTUtil;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.MalformedJwtException;
@@ -46,7 +48,7 @@ class JWTFilterTest {
     }
 
     @Test
-    @DisplayName("유효한 Access 토큰으로 인증 성공")
+    @DisplayName("유효한 Access 토큰일 경우 필터를 통과한다")
     void doFilterInternal_validAccessToken() throws ServletException, IOException {
         // given (유효한 토큰일 경우)
         MockHttpServletRequest request = new MockHttpServletRequest();
@@ -71,7 +73,7 @@ class JWTFilterTest {
     }
 
     @Test
-    @DisplayName("만료된 Access 토큰의 요청일 경우 에러 메시지를 반환한다.")
+    @DisplayName("만료된 Access 토큰의 요청일 경우 에러 메시지를 반환한다")
     void doFilterInternal_expiredToken() throws ServletException, IOException {
         // given (만료된 토큰일 경우)
         MockHttpServletRequest request = new MockHttpServletRequest();
@@ -90,7 +92,7 @@ class JWTFilterTest {
     }
 
     @Test
-    @DisplayName("잘못된 형식의 토큰 요청일 경우 에러 메시지를 반환한다.")
+    @DisplayName("잘못된 형식의 토큰 요청일 경우 에러 메시지를 반환한다")
     void doFilterInternal_malformedToken() throws ServletException, IOException {
         // given
         MockHttpServletRequest request = new MockHttpServletRequest();
