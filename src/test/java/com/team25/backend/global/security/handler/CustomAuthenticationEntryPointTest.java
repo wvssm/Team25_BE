@@ -31,7 +31,7 @@ class CustomAuthenticationEntryPointTest {
 
     @Test
     @DisplayName("인증되지 않은 사용자가 /admin 경로에 접근할 때 로그인 페이지로 리다이렉트 된다")
-    void commence_ShouldRedirectToLogin_WhenRequestIsForAdmin() throws IOException {
+    void commence_인증되지_않은_사용자_로그인_페이지로_리다이렉트() throws IOException {
         // given
         request.setRequestURI("/admin");
         AuthenticationException authException = new AuthenticationException("Unauthorized") {};
@@ -45,7 +45,7 @@ class CustomAuthenticationEntryPointTest {
 
     @Test
     @DisplayName("인증되지 않은 사용자가 /admin 이외의 경로에 접근할 때, 401 상태코드와 에러 메시지가 반환된다")
-    void commence_ShouldReturnUnauthorizedJsonResponse_WhenRequestIsNotForAdmin() throws IOException {
+    void commence_인증되지_않은_사용자_401에러코드와_에러메시지() throws IOException {
         // given
         request.setRequestURI("/user/profile");
         AuthenticationException authException = new AuthenticationException("Unauthorized") {};
