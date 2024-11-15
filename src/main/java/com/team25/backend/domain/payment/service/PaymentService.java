@@ -155,6 +155,8 @@ public class PaymentService {
             billingKey.setOrderId(orderId);
             billingKey.setCardAlias(requestDto.cardAlias() != null ? requestDto.cardAlias() : responseDto.cardName());
             billingKeyRepository.save(billingKey);
+        } else {
+            throw new CustomException(ErrorCode.FAILED_TO_REQUEST_BILLING_KEY);
         }
 
         return responseDto;
@@ -224,7 +226,9 @@ public class PaymentService {
             payment.setTid(responseDto.tid());
             payment.setReceiptUrl(responseDto.receiptUrl());
             paymentRepository.save(payment);
-        }
+        } else {
+        throw new CustomException(ErrorCode.FAILED_TO_PROCESS_PAYMENT);
+    }
 
         return responseDto;
     }
@@ -272,6 +276,8 @@ public class PaymentService {
             payment.setCancelledAt(responseDto.cancelledAt());
             payment.setReceiptUrl(responseDto.receiptUrl());
             paymentRepository.save(payment);
+        } else {
+            throw new CustomException(ErrorCode.FAILED_TO_PROCESS_PAYMENT);
         }
 
         return responseDto;
