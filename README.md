@@ -1,5 +1,9 @@
 # Team25_BE
 
+<img src="https://github.com/user-attachments/assets/8fcad6d6-4464-40f5-b97f-048d49786a5d" width="300" height="150"/>
+<br>
+🏆 카카오 테크 캠퍼스 최종 산출물 29팀 중 우수상
+
 ### ❗ 테스트 안내
 
 > 테스트 시 관리자 페이지에서 매니저 승인이 가능합니다. <br>
